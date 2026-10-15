@@ -204,16 +204,19 @@ func _sync_player_strip(snapshot: Dictionary) -> void:
 
 func _update_measurement() -> void:
 	if ClientSession.last_measurement.is_empty():
-		measurement_label.text = "Noch keine Messung: Der Boden ist verborgen."
+		measurement_label.text = (
+			"KI-Start: Noch kein Wissen. Setze eine Sonde für den ersten Lernschritt."
+		)
 	else:
 		var measurement := ClientSession.last_measurement
 		var slope := float(measurement.get("slope", 0.0))
-		var hint := "fast eben"
+		var hint := "fast eben – ist dies schon das beste Tal?"
 		if slope > 0.075:
-			hint = "tiefer rechts →"
+			hint = "Vermutung nach rechts →"
 		elif slope < -0.075:
-			hint = "← tiefer links"
-		measurement_label.text = "Tiefe: %d   ·   Gefälle: %+.2f   ·   %s" % [
+			hint = "← Vermutung nach links"
+		measurement_label.text = "KI-Schritt %d · Tiefe %d · Gefälle %+.2f · %s" % [
+			_local_measurement_count(),
 			roundi(float(measurement.get("y", GameConstants.SEA_Y)) - GameConstants.SEA_Y),
 			slope,
 			hint,
@@ -225,6 +228,14 @@ func _update_measurement() -> void:
 		if phase == GameManager.PHASE_FINISHED
 		else "← → / A D bewegen   ·   Leertaste / ↓ / S Sonde (3 s Anker)   ·   H Hilfe"
 	)
+
+
+func _local_measurement_count() -> int:
+	var count := 0
+	for measurement: Dictionary in ClientSession.measurements:
+		if int(measurement.get("player_id", 0)) == ClientSession.local_player_id:
+			count += 1
+	return count
 
 
 func _update_finished_panel(snapshot: Dictionary) -> void:

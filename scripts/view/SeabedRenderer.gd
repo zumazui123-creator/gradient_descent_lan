@@ -124,11 +124,11 @@ func _draw_measurements() -> void:
 			4.0,
 			measurement_color
 		)
-		_draw_tangent(measurement, 2.0)
+		_draw_tangent(measurement, 2.0, measurement_color)
 
 	if ClientSession.last_measurement.is_empty():
 		return
-	_draw_tangent(ClientSession.last_measurement, 3.0)
+	_draw_tangent(ClientSession.last_measurement, 3.0, GOLD)
 	draw_circle(
 		Vector2(
 			float(ClientSession.last_measurement.get("x", 0.0)),
@@ -139,7 +139,7 @@ func _draw_measurements() -> void:
 	)
 
 
-func _draw_tangent(measurement: Dictionary, width: float, color: Color = RED ) -> void:
+func _draw_tangent(measurement: Dictionary, width: float, color: Color = RED) -> void:
 	var center_x := float(measurement.get("x", 0.0))
 	var center_y := float(measurement.get("y", 0.0))
 	var slope := float(measurement.get("slope", 0.0))

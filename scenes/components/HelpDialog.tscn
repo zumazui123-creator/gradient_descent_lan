@@ -44,7 +44,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(710, 500)
+custom_minimum_size = Vector2(860, 560)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
@@ -63,16 +63,16 @@ theme_override_constants/separation = 16
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
 theme_override_font_sizes/font_size = 25
-text = "So funktioniert die Schatzsuche"
+text = "So lernt eine KI – vereinfacht"
 horizontal_alignment = 1
 
 [node name="Rules" type="Label" parent="Center/Panel/Margin/Content"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/line_spacing = 10
+theme_override_constants/line_spacing = 7
 theme_override_font_sizes/font_size = 16
-text = "Bewege dein Schiff mit ← / → oder A / D.\nLeertaste, ↓ oder S senkt eine Sonde ab.\nWährend der dreisekündigen Messung liegt das Schiff vor Anker.\nDu erhältst Tiefe und Gefälle nur am Messpunkt.\nSteigt die Tiefe nach rechts, suche weiter rechts.\nEin ebenes lokales Tal muss nicht das tiefste Tal sein.\n40 Sonden pro Spieler; wer den Schatz zuerst trifft, gewinnt.\nIm Teamspiel gewinnt das gesamte Team des Finders.\nDas Spielfeld ist doppelt so breit; die Kamera folgt deinem Schiff.\nDie Lobby legt fest, ob eigene oder alle Messungen sichtbar sind.\nNach der Runde kannst du die Karte mit ← / → ansehen."
-horizontal_alignment = 1
+text = "Du spielst die KI; das Schiff ist ihre aktuelle Vermutung.\nDer Schatz steht für die beste Lösung.\nEine Sonde ist ein Lernschritt: ausprobieren und Rückmeldung erhalten.\nDas Gefälle zeigt, in welcher Richtung es tiefer und damit besser wird.\nBewege deine Vermutung in diese Richtung und miss erneut.\nWie weit du fährst, ähnelt der Lernrate: Große Schritte können das Ziel verpassen.\nSo entsteht die Schleife: vermuten → messen → verbessern.\nAber Vorsicht: Ein flaches lokales Tal kann die KI täuschen!\nEchte KI verändert Zahlen, um ihren Fehler schrittweise zu verkleinern.\n\nSteuerung: ← / → oder A / D bewegt das Schiff.\nLeertaste, ↓ oder S startet eine Messung mit 3 Sekunden Ankerzeit.\n40 Sonden pro Spieler; im Team gewinnt das Team des Finders."
+horizontal_alignment = 0
 vertical_alignment = 1
 
 [node name="CloseButton" type="Button" parent="Center/Panel/Margin/Content"]

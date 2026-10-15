@@ -54,6 +54,11 @@ static func run() -> Array[String]:
 	var help = HelpScene.instantiate()
 	_expect(not help.visible, "Hilfe ist beim Start sichtbar", failures)
 	_expect(help.has_method("open") and help.has_method("close"), "Hilfe-API fehlt", failures)
+	var learning_label := help.get_node("Center/Panel/Margin/Content/Rules") as Label
+	var learning_text := learning_label.text
+	_expect(learning_text.contains("Vermutung"), "KI-Vermutung wird nicht erklärt", failures)
+	_expect(learning_text.contains("Lernschritt"), "KI-Lernschritt wird nicht erklärt", failures)
+	_expect(learning_text.contains("Gefälle"), "Gradientenhinweis wird nicht erklärt", failures)
 	help.free()
 
 	var ship = ShipScene.instantiate()

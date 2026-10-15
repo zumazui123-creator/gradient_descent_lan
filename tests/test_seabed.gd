@@ -12,8 +12,8 @@ static func run() -> Array[String]:
 	)
 
 	_expect(seabed.points.size() == expected_point_count, "Terrain hat falsche Punktzahl", failures)
-	_expect(roundi(seabed.points.front().x) == Constants.WORLD_LEFT, "Terrain startet am falschen x", failures)
-	_expect(roundi(seabed.points.back().x) == Constants.WORLD_RIGHT, "Terrain endet am falschen x", failures)
+	_expect(roundi(seabed.points[0].x) == Constants.WORLD_LEFT, "Terrain startet am falschen x", failures)
+	_expect(roundi(seabed.points[-1].x) == Constants.WORLD_RIGHT, "Terrain endet am falschen x", failures)
 
 	for point: Vector2 in seabed.points:
 		if point.y < 380.0 or point.y > 665.0:
@@ -42,12 +42,12 @@ static func run() -> Array[String]:
 	)
 
 	_expect(
-		is_equal_approx(seabed.depth_at(Constants.WORLD_LEFT - 500.0), seabed.points.front().y),
+		is_equal_approx(seabed.depth_at(Constants.WORLD_LEFT - 500.0), seabed.points[0].y),
 		"depth_at klemmt links nicht",
 		failures
 	)
 	_expect(
-		is_equal_approx(seabed.depth_at(Constants.WORLD_RIGHT + 500.0), seabed.points.back().y),
+		is_equal_approx(seabed.depth_at(Constants.WORLD_RIGHT + 500.0), seabed.points[-1].y),
 		"depth_at klemmt rechts nicht",
 		failures
 	)
@@ -58,8 +58,8 @@ static func run() -> Array[String]:
 	var patch := seabed.patch_at(sample.x)
 	var half_curve := int(Constants.MEASUREMENT_CURVE_LENGTH / 2.0)
 	_expect(not patch.is_empty(), "Mess-Patch ist leer", failures)
-	_expect(roundi(patch.front().x) == int(sample.x) - half_curve, "Mess-Patch startet falsch", failures)
-	_expect(roundi(patch.back().x) == int(sample.x) + half_curve, "Mess-Patch endet falsch", failures)
+	_expect(roundi(patch[0].x) == int(sample.x) - half_curve, "Mess-Patch startet falsch", failures)
+	_expect(roundi(patch[-1].x) == int(sample.x) + half_curve, "Mess-Patch endet falsch", failures)
 
 	var profile := seabed.public_profile()
 	_expect(profile.size() == seabed.points.size(), "Öffentliches Profil ist unvollständig", failures)

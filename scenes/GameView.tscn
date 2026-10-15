@@ -147,7 +147,7 @@ offset_right = 850.0
 offset_bottom = 35.0
 theme_override_colors/font_color = Color(1, 0.74902, 0.337255, 1)
 theme_override_font_sizes/font_size = 18
-text = "Noch keine Messung: Der Boden ist verborgen."
+text = "KI-Start: Noch kein Wissen. Setze eine Sonde für den ersten Lernschritt."
 
 [node name="ControlsLabel" type="Label" parent="HUD/Root/MeasurementPanel/Content" unique_id=617419054]
 layout_mode = 0
@@ -165,7 +165,7 @@ offset_left = 920.0
 offset_top = 10.0
 offset_right = 1042.0
 offset_bottom = 52.0
-text = "Hilfe  H"
+text = "KI-Hilfe  H"
 
 [node name="FinishedPanel" type="PanelContainer" parent="HUD/Root" unique_id=596967432]
 visible = false

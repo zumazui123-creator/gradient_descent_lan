@@ -69,7 +69,7 @@ func patch_at(world_x: float) -> Array[Vector2]:
 	for sample_x in range(left_x, right_x + 1, 5):
 		patch.append(Vector2(sample_x, roundf(depth_at(sample_x))))
 
-	if patch.is_empty() or roundi(patch.back().x) != right_x:
+	if patch.is_empty() or roundi(patch[-1].x) != right_x:
 		patch.append(Vector2(right_x, roundf(depth_at(right_x))))
 
 	return patch

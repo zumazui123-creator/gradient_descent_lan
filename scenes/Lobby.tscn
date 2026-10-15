@@ -119,7 +119,7 @@ text = "Teamspiel: AUS"
 
 [node name="Rule1" type="Label" parent="Center/Panel/Margin/Content/Body/Rules" unique_id=1185945109]
 layout_mode = 2
-text = "Finde den Schatz."
+text = "Lerne wie eine KI: vermuten, messen, verbessern."
 autowrap_mode = 2
 
 [node name="Rule2" type="Label" parent="Center/Panel/Margin/Content/Body/Rules" unique_id=1074563711]
@@ -129,7 +129,7 @@ autowrap_mode = 2
 
 [node name="Rule3" type="Label" parent="Center/Panel/Margin/Content/Body/Rules" unique_id=2002009272]
 layout_mode = 2
-text = "Folge der Steigung. Ein lokales Tal kann täuschen!"
+text = "Sonde = Lernschritt. Folge dem Gefälle – ein lokales Tal kann täuschen!"
 autowrap_mode = 2
 
 [node name="Actions" type="HBoxContainer" parent="Center/Panel/Margin/Content" unique_id=1970143055]

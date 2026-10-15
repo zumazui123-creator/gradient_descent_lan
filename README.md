@@ -1,5 +1,19 @@
 # Gradient Descent – Schatzsuche im LAN
 
+## Lernziel
+
+Das Spiel erklärt Kindern das Grundprinzip des maschinellen Lernens am Beispiel
+von Gradient Descent. Die Kinder spielen selbst die KI: Das Schiff stellt ihre
+aktuelle Vermutung dar, jede
+Sonde einen Lernschritt und das gemessene Gefälle den Hinweis für die nächste
+Verbesserung. Der Schatz steht für die beste gefundene Lösung. Die wiederholte
+Schleife lautet: **vermuten → messen → verbessern**. Ein lokales Tal zeigt
+zugleich, warum eine KI trotz sinnvoller Einzelschritte bei einer nur scheinbar
+guten Lösung landen kann. Die gefahrene Strecke veranschaulicht die Lernrate:
+Zu große Schritte sind schnell, können das Ziel aber überspringen. Echte
+Lernverfahren verändern statt eines Schiffes Zahlen und versuchen damit
+meistens, einen Fehler schrittweise zu verkleinern.
+
 ## Godot-Port (Phase 4)
 
 Der laufende Port liegt direkt in diesem Ordner und benötigt **Godot 4.8 oder
