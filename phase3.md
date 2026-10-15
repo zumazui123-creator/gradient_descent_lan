@@ -12,6 +12,7 @@ Implementierte beziehungsweise erweiterte Dateien:
 scripts/autoload/NetworkManager.gd
 scripts/autoload/GameManager.gd
 scripts/autoload/ClientSession.gd
+tests/test_engine_version.gd
 tests/test_network_contract.gd
 tests/run_phase3.gd
 tests/network_smoke_peer.gd
@@ -221,7 +222,7 @@ einer RPC-Methode die Szene.
 
 ### Logik- und Netzwerkvertrag
 
-Sobald Godot 4.2+ im `PATH` verfügbar ist:
+Sobald Godot 4.7+ im `PATH` verfügbar ist:
 
 ```powershell
 godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
@@ -272,6 +273,6 @@ Sonde aus. Beide Prozesse beenden sich bei Erfolg mit Exit-Code `0`.
 - [ ] Godot-Vertragstests laufen ohne Parser- oder Laufzeitfehler.
 - [ ] Zwei lokale Godot-Prozesse bestehen den ENet-Smoke-Test.
 
-Die letzten beiden Punkte bleiben offen, bis eine Godot-4-Installation im
+Die letzten beiden Punkte bleiben offen, bis eine Godot-4.7+-Installation im
 `PATH` verfügbar ist. Phase 4 verbindet diese Netzwerk-API anschließend mit
 Menü, Lobby und Spielansicht.

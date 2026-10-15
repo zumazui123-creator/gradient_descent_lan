@@ -2,11 +2,14 @@
 
 ## Godot-Port (Phase 4)
 
-Der laufende Port liegt direkt in diesem Ordner und benötigt **Godot 4.2 oder
+Der laufende Port liegt direkt in diesem Ordner und benötigt **Godot 4.7 oder
 neuer**. `project.godot` im Godot Project Manager importieren und das Projekt
 mit **F6/F5** starten. Für einen lokalen Mehrspieler-Test zwei Instanzen öffnen:
 Eine Instanz hostet, die zweite verbindet sich mit `127.0.0.1`. Der Godot-Port
 nutzt ENet über **UDP-Port 50415**.
+
+Das Projekt deklariert `4.7` als Engine-Feature und prüft die Mindestversion
+auch im automatischen Testlauf. Ältere Godot-Versionen werden nicht unterstützt.
 
 Die automatischen Prüfskripte können mit einer Godot-Kommandozeile ausgeführt
 werden:

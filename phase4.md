@@ -24,6 +24,7 @@ scripts/scenes/HelpDialog.gd
 scripts/view/SeabedRenderer.gd
 scripts/view/ShipView.gd
 scripts/view/OverviewBar.gd
+tests/test_engine_version.gd
 tests/test_ui_contract.gd
 tests/run_phase4.gd
 ```
@@ -223,10 +224,11 @@ und Renderer über den zuverlässigen Start-Snapshot.
 
 ## 8. Auflösung und Layout
 
-`project.godot` verwendet den Referenz-Viewport `1200 × 760` und
-`canvas_items`-Stretching. Vollbild-Hintergründe und Dialoge nutzen
-Full-Rect-Anker; die eigentliche Spielansicht behält die Koordinaten der
-Python-Referenz bei.
+`project.godot` verwendet den Referenz-Viewport `1200 × 760`,
+`canvas_items`-Stretching und ausdrücklich `keep` als Seitenverhältnis.
+Damit übernimmt Godot 4.7 nicht den neuen `expand`-Standard.
+Vollbild-Hintergründe und Dialoge nutzen Full-Rect-Anker; die eigentliche
+Spielansicht behält die Koordinaten der Python-Referenz bei.
 
 Container verwalten Menü-, Lobby- und Dialoginhalte. Feste Offsets werden nur
 für das pixelgenaue Spiel-HUD verwendet.
@@ -237,7 +239,7 @@ für das pixelgenaue Spiel-HUD verwendet.
 
 ### Gesamter Vertragslauf
 
-Mit Godot 4.2+:
+Mit Godot 4.7+:
 
 ```powershell
 godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
@@ -246,6 +248,7 @@ godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
 
 Der Lauf enthält alle Tests aus Phase 2 und 3 sowie Szenenprüfungen für:
 
+- Mindestversion Godot 4.7 und Projekt-Feature `4.7`,
 - Main-Szenencontainer und globalen Hinweis,
 - Menü-Eingaben und Buttons,
 - Lobby-Spielerliste und Start-Button,
@@ -274,6 +277,7 @@ Godot-Editor gestartet und mit zwei lokalen Fenstern gespielt.
 
 ## 10. Abnahmekriterien für Phase 4
 
+- [x] `project.godot` verlangt Godot 4.7 und bewahrt das bisherige Seitenverhältnis.
 - [x] Hauptmenü mit Name, IP, Port, Hosten und Beitreten ist implementiert.
 - [x] Lobby mit Spielern, Host-Adresse und Startberechtigung ist implementiert.
 - [x] Szenenwechsel reagieren auf Netzwerk- und Rundenstatus.

@@ -1,5 +1,6 @@
 extends SceneTree
 
+const EngineVersionTests = preload("res://tests/test_engine_version.gd")
 const SeabedTests = preload("res://tests/test_seabed.gd")
 const GameManagerTests = preload("res://tests/test_game_manager.gd")
 
@@ -10,6 +11,7 @@ func _init() -> void:
 
 func _run() -> void:
 	var failures: Array[String] = []
+	failures.append_array(EngineVersionTests.run())
 	failures.append_array(SeabedTests.run())
 	failures.append_array(GameManagerTests.run())
 

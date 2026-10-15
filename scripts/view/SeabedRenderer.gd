@@ -91,8 +91,8 @@ func _draw_released_terrain() -> void:
 		return
 
 	var floor_polygon := PackedVector2Array(points)
-	floor_polygon.append(Vector2(points.back().x, 668))
-	floor_polygon.append(Vector2(points.front().x, 668))
+	floor_polygon.append(Vector2(points[-1].x, 668))
+	floor_polygon.append(Vector2(points[0].x, 668))
 	draw_colored_polygon(floor_polygon, FLOOR_FILL)
 	draw_polyline(points, GREEN, 3.0, true)
 
@@ -154,7 +154,7 @@ func _to_points(source: Variant) -> PackedVector2Array:
 
 
 func _profile_depth(points: PackedVector2Array, world_x: float) -> float:
-	var closest := points.front()
+	var closest := points[0]
 	for point: Vector2 in points:
 		if absf(point.x - world_x) < absf(closest.x - world_x):
 			closest = point

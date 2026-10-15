@@ -1,4 +1,4 @@
-# Phase 1: Architektur und Migrationsvertrag (Python → Godot 4)
+# Phase 1: Architektur und Migrationsvertrag (Python → Godot 4.7)
 
 ## Ziel dieser Phase
 
@@ -12,7 +12,7 @@ Phase ist eindeutig definiert:
 - wie Szenen, Autoloads, Signale und RPCs zusammenspielen,
 - und anhand welcher Kriterien die späteren Phasen geprüft werden.
 
-Zielplattform ist **Godot 4.2 oder neuer mit GDScript**. Die bestehende Python-Version
+Zielplattform ist **Godot 4.7 oder neuer mit GDScript**. Die bestehende Python-Version
 bleibt während der Migration die Referenzimplementierung.
 
 ---
@@ -336,6 +336,7 @@ res://
 │   ├── themes/
 │   └── textures/
 └── tests/
+    ├── test_engine_version.gd
     ├── test_seabed.gd
     ├── test_game_manager.gd
     └── fixtures/
@@ -372,7 +373,7 @@ Sicherheitsregeln angepasst werden.
 - [x] Statusübergänge und Verhalten bei Verbindungsabbruch sind beschrieben.
 - [x] Eine konsistente Godot-Projektstruktur ist festgelegt.
 - [x] Godot-Projektgerüst (`project.godot`, Ordner und Startszene) anlegen.
-- [ ] Projekt in einer installierten Godot-4-Version ohne Parserfehler öffnen.
+- [ ] Projekt in Godot 4.7 oder neuer ohne Parserfehler öffnen.
 
 Das Projektgerüst ist angelegt. Die abschließende Prüfung im Godot-Editor ist
 noch offen, weil in dieser Umgebung kein Godot-Befehl im `PATH` gefunden wurde.

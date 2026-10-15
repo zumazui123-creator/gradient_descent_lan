@@ -2,7 +2,7 @@
 
 ## Ergebnis
 
-Die darstellungsfreie Logik aus `game.py` ist nach Godot 4.2+ portiert. Phase 2
+Die darstellungsfreie Logik aus `game.py` ist nach Godot 4.7+ portiert. Phase 2
 umfasst Konstanten, Spielerdaten, prozedurales Terrain, Bewegung, Sonden,
 Rundenstatus und öffentliche Zustandsdaten. Netzwerk und Benutzeroberfläche
 bleiben bewusst Aufgabe der Phasen 3 und 4.
@@ -14,6 +14,7 @@ scripts/model/GameConstants.gd
 scripts/model/PlayerState.gd
 scripts/model/Seabed.gd
 scripts/autoload/GameManager.gd
+tests/test_engine_version.gd
 tests/test_seabed.gd
 tests/test_game_manager.gd
 tests/run_phase2.gd
@@ -157,6 +158,7 @@ Damit kann Phase 3 das Terrain nicht versehentlich vorzeitig versenden.
 
 Die Tests prüfen unter anderem:
 
+- Godot 4.7 oder neuer und das Projekt-Feature `4.7`,
 - Punktzahl und Grenzen des Terrains,
 - Interpolation, Clamping, Patch und öffentliches Profil,
 - Mindestspielerzahl und doppelte Peer-IDs,
@@ -170,7 +172,7 @@ Die Tests prüfen unter anderem:
   privaten Sondenergebnissen,
 - Freigabe des Gesamtterrains erst nach Rundenende.
 
-Sobald Godot 4 im `PATH` verfügbar ist, werden alle Phase-2-Tests so gestartet:
+Sobald Godot 4.7+ im `PATH` verfügbar ist, werden alle Phase-2-Tests so gestartet:
 
 ```powershell
 godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
@@ -193,6 +195,6 @@ Alternativ heißt der Befehl je nach Installation `godot4`.
 - [x] `git diff --check` meldet keine Formatfehler.
 - [ ] Godot-Headless-Tests laufen ohne Parser- oder Laufzeitfehler.
 
-Der letzte Punkt bleibt offen, bis eine Godot-4-Installation im `PATH`
+Der letzte Punkt bleibt offen, bis eine Godot-4.7+-Installation im `PATH`
 verfügbar ist. Danach beginnt Phase 3 mit ENet und den in `phase1.md`
 definierten RPC-Grenzen.
