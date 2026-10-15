@@ -12,7 +12,7 @@ Phase ist eindeutig definiert:
 - wie Szenen, Autoloads, Signale und RPCs zusammenspielen,
 - und anhand welcher Kriterien die späteren Phasen geprüft werden.
 
-Zielplattform ist **Godot 4.x mit GDScript**. Die bestehende Python-Version
+Zielplattform ist **Godot 4.2 oder neuer mit GDScript**. Die bestehende Python-Version
 bleibt während der Migration die Referenzimplementierung.
 
 ---

@@ -1,0 +1,135 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenes/Lobby.gd" id="1_lobby"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+bg_color = Color(0.0588235, 0.109804, 0.211765, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.172549, 0.298039, 0.443137, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lobby")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.027451, 0.0509804, 0.12549, 1)
+
+[node name="Brand" type="Label" parent="."]
+offset_left = 32.0
+offset_top = 20.0
+offset_right = 500.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
+theme_override_font_sizes/font_size = 23
+text = "GRADIENT DESCENT"
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(990, 530)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 32
+
+[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Lobby"
+
+[node name="StatusLabel" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
+theme_override_font_sizes/font_size = 19
+text = "Verbindung wird vorbereitet …"
+
+[node name="Body" type="HBoxContainer" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 50
+
+[node name="PlayerSection" type="VBoxContainer" parent="Center/Panel/Margin/Content/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Heading" type="Label" parent="Center/Panel/Margin/Content/Body/PlayerSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+text = "Spieler"
+
+[node name="PlayerList" type="VBoxContainer" parent="Center/Panel/Margin/Content/Body/PlayerSection"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Rules" type="VBoxContainer" parent="Center/Panel/Margin/Content/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[node name="Rule1" type="Label" parent="Center/Panel/Margin/Content/Body/Rules"]
+layout_mode = 2
+text = "Wer zuerst nahe dem tiefsten Punkt misst, findet den Schatz."
+autowrap_mode = 2
+
+[node name="Rule2" type="Label" parent="Center/Panel/Margin/Content/Body/Rules"]
+layout_mode = 2
+text = "40 Sonden pro Spieler – nur eigene Messpunkte sind sichtbar."
+autowrap_mode = 2
+
+[node name="Rule3" type="Label" parent="Center/Panel/Margin/Content/Body/Rules"]
+layout_mode = 2
+text = "Folge der Steigung. Ein lokales Tal kann täuschen!"
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 16
+
+[node name="LeaveButton" type="Button" parent="Center/Panel/Margin/Content/Actions"]
+custom_minimum_size = Vector2(170, 48)
+layout_mode = 2
+text = "Verlassen  Esc"
+
+[node name="StartButton" type="Button" parent="Center/Panel/Margin/Content/Actions"]
+custom_minimum_size = Vector2(270, 48)
+layout_mode = 2
+text = "Runde starten  ↵"
+
+[connection signal="pressed" from="Center/Panel/Margin/Content/Actions/LeaveButton" to="." method="_on_leave_button_pressed"]
+[connection signal="pressed" from="Center/Panel/Margin/Content/Actions/StartButton" to="." method="_on_start_button_pressed"]

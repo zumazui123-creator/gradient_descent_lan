@@ -1,5 +1,23 @@
 # Gradient Descent – Schatzsuche im LAN
 
+## Godot-Port (Phase 4)
+
+Der laufende Port liegt direkt in diesem Ordner und benötigt **Godot 4.2 oder
+neuer**. `project.godot` im Godot Project Manager importieren und das Projekt
+mit **F6/F5** starten. Für einen lokalen Mehrspieler-Test zwei Instanzen öffnen:
+Eine Instanz hostet, die zweite verbindet sich mit `127.0.0.1`. Der Godot-Port
+nutzt ENet über **UDP-Port 50415**.
+
+Die automatischen Prüfskripte können mit einer Godot-Kommandozeile ausgeführt
+werden:
+
+```bash
+godot --headless --path . --script res://tests/run_phase4.gd
+```
+
+Die folgende Beschreibung dokumentiert weiterhin die Python-Referenzversion,
+an der der Port funktional ausgerichtet ist.
+
 Ein eigenständiges Pygame-Lernspiel: Zwei bis vier Personen fahren auf derselben
 versteckten Seekarte. Die befahrbare Karte ist doppelt so breit wie in der ersten
 Version (2112 statt 1056 Pixel) und enthält etwa doppelt so viele Täler.

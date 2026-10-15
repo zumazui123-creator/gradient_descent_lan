@@ -6,6 +6,7 @@ config_version=5
 [application]
 
 config/name="Gradient Descent – Schatzsuche im LAN"
+config/features=PackedStringArray("4.2", "GL Compatibility")
 run/main_scene="res://scenes/Main.tscn"
 
 [autoload]

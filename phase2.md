@@ -1,483 +1,198 @@
-# Phase 2: Die Kernlogik portieren (`game.py` \$\\rightarrow\$ GDScript)
+# Phase 2: Kernlogik von Python nach GDScript portieren
 
-In dieser Phase portieren wir die komplette mathematische und spielerische Logik aus `game.py` in native Godot-GDScript-Klassen.
+## Ergebnis
 
-## 1\. Übersicht der Konstanten und Parameter
+Die darstellungsfreie Logik aus `game.py` ist nach Godot 4.2+ portiert. Phase 2
+umfasst Konstanten, Spielerdaten, prozedurales Terrain, Bewegung, Sonden,
+Rundenstatus und öffentliche Zustandsdaten. Netzwerk und Benutzeroberfläche
+bleiben bewusst Aufgabe der Phasen 3 und 4.
 
-In GDScript definieren wir die globalen Konstanten am besten in einem eigenen Skript oder direkt im Game-Manager (Autoload):
+Implementierte Dateien:
 
-class\_name GameConstants
-
-const WIDTH: float \= 1200.0
-
-const HEIGHT: float \= 760.0
-
-const WORLD\_LEFT: float \= 72.0
-
-const WORLD\_RIGHT: float \= 2184.0
-
-const SEA\_Y: float \= 247.0
-
-const PROBES\_PER\_PLAYER: int \= 40
-
-const SHIP\_SPEED: float \= 280.0
-
-const TREASURE\_RADIUS: float \= 22.0
-
-const PLAYER\_COLORS: Array\[String\] \= \["\#40e6ff", "\#ffbd56", "\#c295ff", "\#74f49d"\]
+```text
+scripts/model/GameConstants.gd
+scripts/model/PlayerState.gd
+scripts/model/Seabed.gd
+scripts/autoload/GameManager.gd
+tests/test_seabed.gd
+tests/test_game_manager.gd
+tests/run_phase2.gd
+```
 
 ---
 
-## 2\. Schritt 2.1: Der Terrain-Generator (`Seabed`)
-
-Der Meeresboden wird durch eine Kombination aus Sinuswellen und Gaußschen Glockenkurven erzeugt, um realistische Täler und einen eindeutigen tiefsten Punkt (`treasure_x`) zu berechnen.
-
-### GDScript-Implementierung (`Seabed.gd`):
-
-class\_name Seabed
-
-extends RefCounted
-
-const STEP: int \= 4
-
-var points: Array \= \[\] \# Enthält Arrays aus \[x, y\]
-
-var treasure\_x: float \= 0.0
-
-func \_init(seed\_value: int) \-\> void:
-
-    var rng \= RandomNumberGenerator.new()
-
-    rng.seed \= seed\_value
-
-    
-
-    var world\_width \= GameConstants.WORLD\_RIGHT \- GameConstants.WORLD\_LEFT
-
-    var centers: Array\[float\] \= \[\]
-
-    for i in range(6):
-
-        centers.append((i \+ 0.5) / 6.0 \+ rng.randf\_range(-0.016, 0.016))
-
-    
-
-    var amplitudes: Array\[float\] \= \[\]
-
-    for c in centers:
-
-        amplitudes.append(rng.randf\_range(77.0, 107.0))
-
-    amplitudes\[rng.randi\_range(0, centers.size() \- 1)\] \+= 31.0
-
-    
-
-    var phase \= rng.randf\_range(-PI, PI)
-
-    points.clear()
-
-    
-
-    var x \= GameConstants.WORLD\_LEFT
-
-    while x \<= GameConstants.WORLD\_RIGHT:
-
-        var t \= (x \- GameConstants.WORLD\_LEFT) / world\_width
-
-        var y \= 426.0 \+ 15.0 \* sin(2.0 \* PI \* 1.1 \* t \+ phase)
-
-        
-
-        for i in range(centers.size()):
-
-            var center \= centers\[i\]
-
-            var amp \= amplitudes\[i\]
-
-            y \+= amp \* exp(-0.5 \* pow((t \- center) / 0.039, 2))
-
-            
-
-        y \+= 7.0 \* sin(2.0 \* PI \* 9.2 \* t \+ phase \* 0.57)
-
-        points.append(\[x, clamp(y, 380.0, 665.0)\])
-
-        x \+= STEP
-
-        
-
-    \# Tiefsten Punkt (Schatz) finden (höchster y-Wert in Pixeln, da y nach unten zeigt)
-
-    var max\_y \= \-1.0
-
-    var cand\_x \= GameConstants.WORLD\_LEFT
-
-    for i in range(7, points.size() \- 7):
-
-        var pt \= points\[i\]
-
-        if pt\[1\] \> max\_y:
-
-            max\_y \= pt\[1\]
-
-            cand\_x \= pt\[0\]
-
-    treasure\_x \= cand\_x
-
-func depth\_at(x: float) \-\> float:
-
-    x \= clamp(x, GameConstants.WORLD\_LEFT, GameConstants.WORLD\_RIGHT)
-
-    var i \= int(floor((x \- GameConstants.WORLD\_LEFT) / STEP))
-
-    i \= clampi(i, 0, points.size() \- 2\)
-
-    var p0 \= points\[i\]
-
-    var p1 \= points\[i \+ 1\]
-
-    return p0\[1\] \+ (p1\[1\] \- p0\[1\]) \* (x \- p0\[0\]) / float(STEP)
-
-func slope\_at(x: float) \-\> float:
-
-    var left \= max(GameConstants.WORLD\_LEFT, x \- 12.0)
-
-    var right \= min(GameConstants.WORLD\_RIGHT, x \+ 12.0)
-
-    return (depth\_at(right) \- depth\_at(left)) / (right \- left)
-
-func patch\_at(x: float) \-\> Array:
-
-    var left \= max(GameConstants.WORLD\_LEFT, int(x) \- 55\)
-
-    var right \= min(GameConstants.WORLD\_RIGHT, int(x) \+ 55\)
-
-    var xs: Array\[int\] \= \[\]
-
-    var px \= left
-
-    while px \<= right:
-
-        xs.append(px)
-
-        px \+= 5
-
-    if xs.back() \!= right:
-
-        xs.append(int(right))
-
-    
-
-    var patch: Array \= \[\]
-
-    for p in xs:
-
-        patch.append(\[p, round(depth\_at(float(p)))\])
-
-    return patch
-
-func public\_profile() \-\> Array:
-
-    var profile: Array \= \[\]
-
-    for p in points:
-
-        profile.append(\[p\[0\], round(p\[1\])\])
-
-    return profile
+## 1. Portierte Konstanten
+
+`GameConstants.gd` ist die gemeinsame Quelle für Spielparameter:
+
+| Konstante | Wert |
+|---|---:|
+| Referenz-Viewport | `1200 × 760` |
+| Weltgrenzen | `72 … 2184` |
+| Meeresoberfläche | `247` |
+| Spielerzahl | `2 … 4` |
+| Sonden je Spieler | `40` |
+| Schiffsgeschwindigkeit | `280 px/s` |
+| Schatzradius | `22 px` |
+| Sonden-Cooldown | `0,40 s` |
+
+Die vier Spielerfarben wurden unverändert übernommen.
 
 ---
 
-## 3\. Schritt 2.2: Spieler-Datenstruktur (`Player`)
+## 2. `PlayerState.gd`
 
-Der Spieler speichert alle zustandsbezogenen Daten für das Multiplayer-Spiel.
+`PlayerState` ersetzt die Python-Dataclass `Player` und speichert:
 
-### GDScript-Implementierung (`Player.gd`):
+- Peer-/Spieler-ID,
+- Anzeigename und Farbe,
+- autoritative x-Position,
+- verbleibende Sonden,
+- aktuelle Bewegungsachse,
+- Zeitpunkt der letzten Sonde,
+- Anzahl der Messungen.
 
-class\_name Player
-
-extends RefCounted
-
-var id: int
-
-var name: String
-
-var color: String
-
-var x: float
-
-var probes\_left: int \= GameConstants.PROBES\_PER\_PLAYER
-
-var axis: int \= 0
-
-var last\_probe: float \= \-10.0
-
-var measurements: int \= 0
-
-func \_init(p\_id: int, p\_name: String, p\_color: String, p\_x: float) \-\> void:
-
-    id \= p\_id
-
-    name \= p\_name.substr(0, 18\)
-
-    color \= p\_color
-
-    x \= p\_x
-
-func public\_dict() \-\> Dictionary:
-
-    return {
-
-        "id": id,
-
-        "name": name,
-
-        "color": color,
-
-        "x": snappedf(x, 0.1),
-
-        "probes\_left": probes\_left,
-
-        "measurements": measurements
-
-    }
+`reset_for_round()` setzt alle rundenbezogenen Werte zurück. `public_data()`
+liefert ausschließlich Daten, die an alle Clients übertragen werden dürfen.
+`axis` und `last_probe_time` sind absichtlich nicht enthalten.
 
 ---
 
-## 4\. Schritt 2.3: Spielschleife & Spielzustand (`GameState`)
+## 3. `Seabed.gd`
 
-Der `GameState` verwaltet die Spieler, Phasen (`lobby`, `playing`, `finished`) sowie die Physik-Ticks und Sondenabfragen.
+Der Generator bewahrt die Regeln aus `game.py`:
 
-### GDScript-Implementierung (`GameState.gd` als Autoload oder Node):
+1. Ein lokaler `RandomNumberGenerator` wird mit dem Runden-Seed initialisiert.
+2. Sechs leicht versetzte Gauß-Täler werden erzeugt.
+3. Eines der Täler erhält einen zusätzlichen Tiefenbonus.
+4. Zwei Sinusanteile sorgen für groß- und kleinskalige Variation.
+5. Die Höhe wird auf `380 … 665` begrenzt.
+6. Terrainpunkte liegen im Abstand von vier Pixeln.
+7. Der tiefste zulässige Punkt wird zu `treasure_x`.
 
-class\_name GameStateClass
+Öffentliche Methoden:
 
-extends Node
+| Methode | Zweck |
+|---|---|
+| `depth_at(x)` | geklemmte lineare Interpolation zwischen Stützpunkten |
+| `slope_at(x)` | zentrierte Differenz über maximal 24 Pixel |
+| `patch_at(x)` | sichtbarer Messbereich von ungefähr `x ± 55` |
+| `public_profile()` | gerundetes Gesamtprofil nach Rundenende |
 
-var players: Dictionary \= {} \# id \-\> Player
+Godots und Pythons Zufallszahlengenerator erzeugen für denselben Seed nicht
+dieselbe Punktfolge. Die Godot-Version ist innerhalb derselben Engine-Version
+deterministisch; Formel, Grenzen und Spielregeln bleiben identisch.
 
-var phase: String \= "lobby" \# lobby, playing, finished
+---
 
-var round\_number: int \= 0
+## 4. `GameManager.gd`
 
-var winner \= null \# int or null
+Der Autoload ersetzt `GameState` und besitzt den autoritativen Zustand:
 
-var seabed: Seabed \= null
+```text
+lobby → playing → finished
+          ↑           │
+          └─ Neustart ┘
+```
 
-var next\_id: int \= 1
+### Spieler
 
-func add\_player(p\_name: String) \-\> Player:
+`add_player(peer_id, name)` verwendet die Godot-Peer-ID direkt als Spieler-ID.
+Das vermeidet eine zweite ID-Zuordnung im Netzwerkcode. Farben werden aus den
+noch unbenutzten Farben gewählt, damit auch nach einem Verbindungsabbruch keine
+doppelten Farben entstehen.
 
-    if phase \!= "lobby" and phase \!= "finished":
+Beitritte sind wie in Python nur in `lobby` oder `finished` möglich. Eine Runde
+benötigt mindestens zwei und erlaubt höchstens vier Spieler.
 
-        return null
+### Rundenstart
 
-    if players.size() \>= GameConstants.PLAYER\_COLORS.size():
+`start_round(seed)`:
 
-        return null
+- erzeugt ein neues `Seabed`,
+- erhöht die Rundennummer,
+- löscht den Gewinner,
+- verteilt die Spieler gleichmäßig über die Welt,
+- setzt Achse, Messungen, Cooldown und Sondenvorrat zurück.
 
-        
+Ein expliziter Seed ermöglicht reproduzierbare Tests. Ohne Seed wird ein neuer
+zufälliger Seed erzeugt.
 
-    var pid \= next\_id
+### Bewegung
 
-    next\_id \+= 1
+`set_axis()` akzeptiert nur `-1`, `0` und `1`. `tick(delta)` begrenzt `delta`
+wie die Python-Version auf maximal `0,12 s` und klemmt jedes Schiff an die
+Weltgrenzen.
 
-    var color \= GameConstants.PLAYER\_COLORS\[(pid \- 1\) % GameConstants.PLAYER\_COLORS.size()\]
+### Sonden
 
-    var start\_x \= GameConstants.WORLD\_LEFT \+ (GameConstants.WORLD\_RIGHT \- GameConstants.WORLD\_LEFT) / 2.0
+`probe(peer_id, now_seconds)` prüft vor jeder Messung:
 
-    
+- existiert der Spieler,
+- läuft die Runde,
+- existiert ein Terrain,
+- sind Sonden übrig,
+- ist der Cooldown abgelaufen.
 
-    var player \= Player.new(pid, p\_name if p\_name \!= "" else "Spieler %d" % pid, color, start\_x)
+Ein erfolgreiches Ergebnis enthält nur den lokalen Patch, Tiefe, Gefälle,
+verbleibende Sonden und den Fundstatus. Es enthält niemals Seed,
+Gesamtterrain oder Schatzposition.
 
-    players\[pid\] \= player
+### Informationsgrenze
 
-    return player
+Die drei Ausgabemethoden haben bewusst verschiedene Sichtbarkeiten:
 
-func remove\_player(pid: int) \-\> void:
+| Methode | Inhalt | Netzwerkziel |
+|---|---|---|
+| `snapshot()` | Phase, Runde, Gewinner, öffentliche Spielerdaten | alle Peers |
+| `probe()` | genau eine private Messung | nur anfragender Peer |
+| `round_result()` | Gesamtterrain und Schatzposition | alle Peers, aber nur nach `finished` |
 
-    players.erase(pid)
+`round_result()` liefert während `lobby` und `playing` ein leeres Dictionary.
+Damit kann Phase 3 das Terrain nicht versehentlich vorzeitig versenden.
 
-    if phase \== "playing" and not players.is\_empty():
+---
 
-        var all\_empty \= true
+## 5. Automatisierte Tests
 
-        for p in players.values():
+Die Tests prüfen unter anderem:
 
-            if p.probes\_left \> 0:
-
-                all\_empty \= false
-
-                break
-
-        if all\_empty:
-
-            phase \= "finished"
-
-func start\_round(seed\_value: int \= \-1) \-\> bool:
-
-    if phase \!= "lobby" and phase \!= "finished":
-
-        return false
-
-    if players.size() \< 2:
-
-        return false
-
-        
-
-    var rng\_seed \= seed\_value if seed\_value \!= \-1 else randi()
-
-    seabed \= Seabed.new(rng\_seed)
-
-    round\_number \+= 1
-
-    winner \= null
-
-    phase \= "playing"
-
-    
-
-    var ordered\_ids \= players.keys()
-
-    ordered\_ids.sort()
-
-    for i in range(ordered\_ids.size()):
-
-        var p \= players\[ordered\_ids\[i\]\]
-
-        p.x \= GameConstants.WORLD\_LEFT \+ (GameConstants.WORLD\_RIGHT \- GameConstants.WORLD\_LEFT) \* (i \+ 1\) / float(ordered\_ids.size() \+ 1\)
-
-        p.axis \= 0
-
-        p.probes\_left \= GameConstants.PROBES\_PER\_PLAYER
-
-        p.measurements \= 0
-
-        p.last\_probe \= \-10.0
-
-    return true
-
-func set\_axis(pid: int, ax: int) \-\> void:
-
-    if players.has(pid) and phase \== "playing" and (ax \== \-1 or ax \== 0 or ax \== 1):
-
-        players\[pid\].axis \= ax
-
-func tick(dt: float) \-\> void:
-
-    if phase \!= "playing":
-
-        return
-
-    for p in players.values():
-
-        p.x \= clamp(p.x \+ p.axis \* GameConstants.SHIP\_SPEED \* min(dt, 0.12), GameConstants.WORLD\_LEFT, GameConstants.WORLD\_RIGHT)
-
-func probe(pid: int, now: float \= \-1.0) \-\> Dictionary:
-
-    if not players.has(pid) or phase \!= "playing" or seabed \== null:
-
-        return {}
-
-        
-
-    var p: Player \= players\[pid\]
-
-    var stamp \= Time.get\_unix\_time\_from\_system() if now \== \-1.0 else now
-
-    
-
-    if p.probes\_left \<= 0 or (stamp \- p.last\_probe \< 0.40):
-
-        return {}
-
-        
-
-    p.last\_probe \= stamp
-
-    p.probes\_left \-= 1
-
-    p.measurements \+= 1
-
-    
-
-    var x \= p.x
-
-    var depth \= seabed.depth\_at(x)
-
-    var slope \= seabed.slope\_at(x)
-
-    var found \= abs(x \- seabed.treasure\_x) \<= GameConstants.TREASURE\_RADIUS
-
-    
-
-    if found:
-
-        winner \= pid
-
-        phase \= "finished"
-
-    else:
-
-        var all\_empty \= true
-
-        for pl in players.values():
-
-            if pl.probes\_left \> 0:
-
-                all\_empty \= false
-
-                break
-
-        if all\_empty:
-
-            phase \= "finished"
-
-            
-
-    return {
-
-        "type": "probe\_result",
-
-        "x": snappedf(x, 0.1),
-
-        "y": snappedf(depth, 0.1),
-
-        "slope": snappedf(slope, 0.001),
-
-        "patch": seabed.patch\_at(x),
-
-        "probes\_left": p.probes\_left,
-
-        "found": found
-
-    }
-
-func snapshot() \-\> Dictionary:
-
-    var p\_list \= \[\]
-
-    var ordered\_ids \= players.keys()
-
-    ordered\_ids.sort()
-
-    for pid in ordered\_ids:
-
-        p\_list.append(players\[pid\].public\_dict())
-
-        
-
-    return {
-
-        "type": "state",
-
-        "phase": phase,
-
-        "round": round\_number,
-
-        "winner": winner,
-
-        "players": p\_list
-
-    }
+- Punktzahl und Grenzen des Terrains,
+- Interpolation, Clamping, Patch und öffentliches Profil,
+- Mindestspielerzahl und doppelte Peer-IDs,
+- eindeutige Spielerfarben,
+- Startpositionen und Rundenzähler,
+- Begrenzung des Tick-Deltas,
+- Validierung der Bewegungsachse,
+- Verbrauch einer Sonde und Cooldown,
+- Fund des Schatzes und Wechsel zu `finished`,
+- Abwesenheit von Seed, Gesamtterrain und Schatzposition in Snapshots und
+  privaten Sondenergebnissen,
+- Freigabe des Gesamtterrains erst nach Rundenende.
+
+Sobald Godot 4 im `PATH` verfügbar ist, werden alle Phase-2-Tests so gestartet:
+
+```powershell
+godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
+  --script res://tests/run_phase2.gd
+```
+
+Alternativ heißt der Befehl je nach Installation `godot4`.
+
+---
+
+## 6. Abnahmekriterien für Phase 2
+
+- [x] Alle Konstanten aus `game.py` sind zentral portiert.
+- [x] Spielerzustand und öffentlicher Spieler-Snapshot sind implementiert.
+- [x] Terrainformel, Interpolation, Gefälle und Mess-Patches sind portiert.
+- [x] Spieleraufnahme, Rundenstart und Bewegung sind implementiert.
+- [x] Sondenverbrauch, Cooldown, Gewinner und Rundenende sind implementiert.
+- [x] Snapshot, privates Sondenergebnis und Rundenergebnis sind getrennt.
+- [x] Automatisierte Paritäts- und Datenschutztests sind vorhanden.
+- [x] `git diff --check` meldet keine Formatfehler.
+- [ ] Godot-Headless-Tests laufen ohne Parser- oder Laufzeitfehler.
+
+Der letzte Punkt bleibt offen, bis eine Godot-4-Installation im `PATH`
+verfügbar ist. Danach beginnt Phase 3 mit ENet und den in `phase1.md`
+definierten RPC-Grenzen.

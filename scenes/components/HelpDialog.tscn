@@ -1,0 +1,83 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenes/HelpDialog.gd" id="1_help"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+bg_color = Color(0.0588235, 0.109804, 0.211765, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.172549, 0.298039, 0.443137, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="HelpDialog" type="Control"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_help")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0.0117647, 0.0352941, 0.0862745, 0.86)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(710, 500)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 42
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 42
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
+theme_override_font_sizes/font_size = 25
+text = "So funktioniert die Schatzsuche"
+horizontal_alignment = 1
+
+[node name="Rules" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/line_spacing = 10
+theme_override_font_sizes/font_size = 16
+text = "Bewege dein Schiff mit ← / → oder A / D.\nLeertaste, ↓ oder S senkt eine Sonde ab.\nDu erhältst Tiefe und Gefälle nur am Messpunkt.\nSteigt die Tiefe nach rechts, suche weiter rechts.\nEin ebenes lokales Tal muss nicht das tiefste Tal sein.\n40 Sonden pro Spieler; wer den Schatz zuerst trifft, gewinnt.\nDas Spielfeld ist doppelt so breit; die Kamera folgt deinem Schiff.\nAlle spielen auf derselben Karte. Nur eigene Messungen sind sichtbar.\nNach der Runde kannst du die Karte mit ← / → ansehen."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Schließen  H / Esc"
+
+[connection signal="pressed" from="Center/Panel/Margin/Content/CloseButton" to="." method="_on_close_button_pressed"]

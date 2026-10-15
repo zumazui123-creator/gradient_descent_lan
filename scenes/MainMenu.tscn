@@ -1,4 +1,18 @@
-[gd_scene format=3]
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenes/MainMenu.gd" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+bg_color = Color(0.0588235, 0.109804, 0.211765, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.172549, 0.298039, 0.443137, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -7,6 +21,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_menu")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -18,6 +33,26 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.027451, 0.0509804, 0.12549, 1)
 
+[node name="Brand" type="Label" parent="."]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 20.0
+offset_right = 500.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
+theme_override_font_sizes/font_size = 23
+text = "GRADIENT DESCENT"
+
+[node name="BrandSubtitle" type="Label" parent="."]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 55.0
+offset_right = 500.0
+offset_bottom = 83.0
+theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
+theme_override_font_sizes/font_size = 15
+text = "Schatzsuche im LAN"
+
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -27,36 +62,98 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(680, 360)
+custom_minimum_size = Vector2(680, 530)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_panel")
 
-[node name="Content" type="VBoxContainer" parent="Center/Panel"]
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
 layout_mode = 2
-theme_override_constants/separation = 20
-alignment = 1
+theme_override_constants/margin_left = 54
+theme_override_constants/margin_top = 34
+theme_override_constants/margin_right = 54
+theme_override_constants/margin_bottom = 34
 
-[node name="Title" type="Label" parent="Center/Panel/Content"]
+[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
-theme_override_font_sizes/font_size = 40
-text = "GRADIENT DESCENT"
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Gemeinsam auf Schatzsuche"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Center/Panel/Content"]
+[node name="Subtitle" type="Label" parent="Center/Panel/Margin/Content"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
-theme_override_font_sizes/font_size = 22
-text = "Schatzsuche im LAN"
+text = "Ein Host, zwei bis vier Spieler, eine unbekannte Seekarte."
 horizontal_alignment = 1
 
-[node name="PhaseStatus" type="Label" parent="Center/Panel/Content"]
+[node name="Separator" type="HSeparator" parent="Center/Panel/Margin/Content"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Godot-Projektgerüst aus Phase 1 ist aktiv."
-horizontal_alignment = 1
 
-[node name="NextStep" type="Label" parent="Center/Panel/Content"]
+[node name="NameLabel" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+text = "Dein Name"
+
+[node name="NameInput" type="LineEdit" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Spieler"
+placeholder_text = "Spielername"
+max_length = 18
+select_all_on_focus = true
+
+[node name="AddressLabel" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+text = "Host-IP (zum Beitreten)"
+
+[node name="AddressInput" type="LineEdit" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "127.0.0.1"
+placeholder_text = "192.168.1.42"
+max_length = 80
+
+[node name="PortLabel" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+text = "UDP-Port"
+
+[node name="PortInput" type="LineEdit" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "50415"
+placeholder_text = "50415"
+max_length = 5
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="HostButton" type="Button" parent="Center/Panel/Margin/Content/Buttons"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Spiel hosten"
+
+[node name="JoinButton" type="Button" parent="Center/Panel/Margin/Content/Buttons"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Beitreten"
+
+[node name="StatusLabel" type="Label" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 26)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
-text = "Als Nächstes: Kernlogik aus game.py portieren (Phase 2)"
+text = "Gleiche WLAN-/LAN-Verbindung erforderlich"
 horizontal_alignment = 1
+
+[node name="ControlsLabel" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
+text = "← / → bewegen   ·   Leertaste messen   ·   H Hilfe"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="Center/Panel/Margin/Content/Buttons/HostButton" to="." method="_on_host_button_pressed"]
+[connection signal="pressed" from="Center/Panel/Margin/Content/Buttons/JoinButton" to="." method="_on_join_button_pressed"]

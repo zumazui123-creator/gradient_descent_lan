@@ -1,283 +1,295 @@
-# Phase 4: Benutzeroberfläche und Grafik implementieren (`gui.py` \$\\rightarrow\$ Godot Szenen & Nodes)
+# Phase 4: Benutzeroberfläche, Kamera und Grafik
 
-In dieser Phase bauen wir die visuellen Elemente und Szenen in Godot nach, die zuvor in Python mit Pygame (`gui.py`) gerendert wurden. Godot nutzt hierfür das hierarchische Szenensystem aus `Control`\-Nodes (für UI) und `Node2D`/`Line2D` (für die Spielwelt).
+## Ergebnis
 
----
+Die Pygame-Oberfläche aus `gui.py` ist als Godot-Szenenstruktur umgesetzt.
+Menü, Lobby, Spielansicht, Kamera, Schiffe, Terrain-Patches, Tangente,
+Sondenanimation, Hilfe und Rundenende verwenden die in den Phasen 1 bis 3
+festgelegten Zustands- und Netzwerkgrenzen.
 
-## 1\. Schritt 4.1: Hauptmenü-Szene (`Menu.tscn`)
+Neue beziehungsweise erweiterte Dateien:
 
-Die Hauptmenü-Szene ermöglicht dem Spieler die Eingabe seines Namens, der Server-IP und die Auswahl zwischen "Spiel hosten" und "Beitreten".
+```text
+scenes/Main.tscn
+scenes/MainMenu.tscn
+scenes/Lobby.tscn
+scenes/GameView.tscn
+scenes/components/HelpDialog.tscn
+scenes/components/ShipView.tscn
+scripts/scenes/Main.gd
+scripts/scenes/MainMenu.gd
+scripts/scenes/Lobby.gd
+scripts/scenes/GameView.gd
+scripts/scenes/HelpDialog.gd
+scripts/view/SeabedRenderer.gd
+scripts/view/ShipView.gd
+scripts/view/OverviewBar.gd
+tests/test_ui_contract.gd
+tests/run_phase4.gd
+```
 
-### Szenenstruktur (`Menu.tscn`):
-
-* `Control` (Root, Layout: Full Rect)  
-  * `ColorRect` (Hintergrundfarbe, z. B. dunkles Blau/Navy)  
-  * `PanelContainer` (Zentraler Kasten für das Menü)  
-    * `VBoxContainer` oder `GridContainer` (Inhalt)  
-      * `Label` ("Gemeinsam auf Schatzsuche")  
-      * `Label` ("Dein Name:")  
-      * `LineEdit` (NameLineEdit)  
-      * `Label` ("Host-IP (zum Beitreten):")  
-      * `LineEdit` (AddressLineEdit)  
-      * `HBoxContainer` (Buttons)  
-        * `Button` (HostButton \- Text: "Spiel hosten")  
-        * `Button` (JoinButton \- Text: "Beitreten")  
-      * `Label` (InfoLabel \- Port & Hinweise)
-
-### GDScript-Skript für das Hauptmenü (`Menu.gd`):
-
-extends Control
-
-@onready var name\_input: LineEdit \= \$PanelContainer/VBoxContainer/NameLineEdit
-
-@onready var address\_input: LineEdit \= \$PanelContainer/VBoxContainer/AddressLineEdit
-
-@onready var info\_label: Label \= \$PanelContainer/VBoxContainer/InfoLabel
-
-func \_ready() \-\> void:
-
-    info\_label.text \= "Port: %d · Gleiche LAN-Verbindung nötig" % NetworkManager.DEFAULT\_PORT
-
-func \_on\_host\_button\_pressed() \-\> void:
-
-    NetworkManager.player\_name \= name\_input.text if name\_input.text \!= "" else "Spieler"
-
-    var err \= NetworkManager.host\_game()
-
-    if err \== OK:
-
-        get\_tree().change\_scene\_to\_file("res://scenes/Lobby.tscn")
-
-    else:
-
-        info\_label.text \= "Host konnte nicht starten: Fehler %d" % err
-
-func \_on\_join\_button\_pressed() \-\> void:
-
-    NetworkManager.player\_name \= name\_input.text if name\_input.text \!= "" else "Spieler"
-
-    var ip \= address\_input.text.strip\_edges()
-
-    if ip \== "":
-
-        ip \= "127.0.0.1"
-
-    var err \= NetworkManager.join\_game(ip)
-
-    if err \== OK:
-
-        get\_tree().change\_scene\_to\_file("res://scenes/Lobby.tscn")
-
-    else:
-
-        info\_label.text \= "Verbindung fehlgeschlagen."
+Alle Grafikelemente werden mit Godot-Nodes und `_draw()` erzeugt. Der Port
+benötigt daher keine externen Bilder oder Schriftdateien.
 
 ---
 
-## 2\. Schritt 4.2: Lobby-Szene (`Lobby.tscn`)
+## 1. Szenenfluss
 
-In der Lobby sehen alle verbundenen Spieler ihre Namen und Farben. Der Host kann ab 2 Spielern die Runde starten.
+`Main.tscn` bleibt während der gesamten Sitzung aktiv. `Main.gd` tauscht nur
+den Inhalt von `SceneContainer` aus:
 
-### Szenenstruktur (`Lobby.tscn`):
+```text
+MainMenu
+   │ Verbindung bestätigt
+   v
+ Lobby
+   │ Runde gestartet
+   v
+GameView ── Rundenende ──> Ergebnisdialog in GameView
+   │ Esc / Menü
+   v
+MainMenu
+```
 
-* `Control` (Root)  
-  * `Panel` (Hintergrund-Container)  
-    * `VBoxContainer`  
-      * `Label` ("Lobby")  
-      * `Label` (StatusLabel \- IP-Adresse oder Wartestatus)  
-      * `ItemList` oder `VBoxContainer` (PlayerListContainer \- Zeigt verbundene Spieler)  
-      * `Button` (StartButton \- "Runde starten ↵", anfangs deaktiviert)
+Der Szenenwechsel reagiert auf Signale von `NetworkManager`. RPC-Methoden
+wechseln keine Szene. Verbindungsfehler, Serverabbruch und Hinweise erscheinen
+im globalen `NoticeLabel`.
 
-### GDScript-Skript für die Lobby (`Lobby.gd`):
-
-extends Control
-
-@onready var status\_label: Label \= \$Panel/VBoxContainer/StatusLabel
-
-@onready var player\_list\_container: VBoxContainer \= \$Panel/VBoxContainer/PlayerListContainer
-
-@onready var start\_button: Button \= \$Panel/VBoxContainer/StartButton
-
-func \_ready() \-\> void:
-
-    if NetworkManager.is\_host:
-
-        status\_label.text \= "Mitspieler verbinden sich mit %s:%d" % \[NetworkManager.local\_ip(), NetworkManager.DEFAULT\_PORT\]
-
-        start\_button.visible \= true
-
-    else:
-
-        status\_label.text \= "Warte, bis der Host die Runde startet..."
-
-        start\_button.visible \= false
-
-func \_process(\_delta: float) \-\> void:
-
-    \# Spielerliste dynamisch aus GameState aktualisieren
-
-    update\_player\_list()
-
-    
-
-    \# Host darf starten, wenn mind. 2 Spieler da sind
-
-    if NetworkManager.is\_host:
-
-        start\_button.disabled \= GameState.players.size() \< 2
-
-func update\_player\_list() \-\> void:
-
-    \# Vorherige Einträge löschen
-
-    for child in player\_list\_container.get\_children():
-
-        child.queue\_free()
-
-        
-
-    for p in GameState.players.values():
-
-        var lbl \= Label.new()
-
-        lbl.text \= p.name \+ (" (Host)" if p.id \== 1 else "")
-
-        lbl.add\_theme\_color\_override("font\_color", Color(p.color))
-
-        player\_list\_container.add\_child(lbl)
-
-func \_on\_start\_button\_pressed() \-\> void:
-
-    if NetworkManager.is\_host:
-
-        \# RPC an alle Clients, um das Spiel zu starten
-
-        NetworkManager.request\_start\_round.rpc()
+Ein Beitritt nach Rundenende öffnet direkt `GameView`, weil der Client den
+finalen Snapshot und das freigegebene Terrain erhält.
 
 ---
 
-## 3\. Schritt 4.3: Spielfeld-Szene (`Game.tscn`)
+## 2. Hauptmenü
 
-Die Spielszene ist das Herzstück. Hier wird der Meeresboden performant gezeichnet, die Schiffe bewegt und die Kamera nachgeführt.
+`MainMenu.tscn` enthält:
 
-### Szenenstruktur (`Game.tscn`):
+- Spielername mit maximal 18 Zeichen,
+- Host-IP,
+- UDP-Port,
+- „Spiel hosten“ und „Beitreten“,
+- Verbindungs- und Validierungsmeldungen.
 
-* `Node2D` (Root)  
-  * `CanvasLayer` (Für UI-Elemente wie Sonden-Zähler und HUD)  
-    * `Control` (HUD)  
-      * `Label` (InfoLabel \- Gefälle, Tiefe, Sonden)  
-      * `Button` (HelpButton \- "Hilfe H")  
-  * `Node2D` (WorldContainer)  
-    * `Line2D` (SeabedLine \- Zeichnet den Meeresboden fließend)  
-    * `Node2D` (ShipsContainer \- Enthält die Schiffe der Spieler)  
-    * `Camera2D` (GameCamera \- Mit sanftem Smoothing `position_smoothing_enabled = true`)
-
-### GDScript-Skript für das Spielfeld (`Game.gd`):
-
-extends Node2D
-
-@onready var seabed\_line: Line2D \= \$WorldContainer/SeabedLine
-
-@onready var game\_camera: Camera2D \= \$WorldContainer/GameCamera
-
-@onready var info\_label: Label \= \$CanvasLayer/HUD/InfoLabel
-
-var local\_player\_id: int \= 1 \# Eigene Peer ID ermitteln
-
-func \_ready() \-\> void:
-
-    local\_player\_id \= multiplayer.get\_unique\_id()
-
-    draw\_seabed()
-
-func draw\_seabed() \-\> void:
-
-    if GameState.seabed:
-
-        var points \= PackedVector2Array()
-
-        for pt in GameState.seabed.public\_profile():
-
-            points.append(Vector2(pt\[0\], pt\[1\]))
-
-        seabed\_line.points \= points
-
-func \_process(dt: float) \-\> void:
-
-    \# 1\. Eingabe erfassen (Pfeiltasten / A / D)
-
-    var axis \= 0
-
-    if Input.is\_action\_pressed("ui\_right") or Input.is\_action\_pressed("move\_right"):
-
-        axis \= 1
-
-    elif Input.is\_action\_pressed("ui\_left") or Input.is\_action\_pressed("move\_left"):
-
-        axis \= \-1
-
-        
-
-    \# An Server senden
-
-    if NetworkManager.peer:
-
-        NetworkManager.send\_axis.rpc\_id(1, axis)
-
-        
-
-    \# Sonden auslösen per Leertaste oder Sonden-Taste
-
-    if Input.is\_action\_just\_pressed("probe") or Input.is\_action\_just\_pressed("ui\_down"):
-
-        NetworkManager.request\_probe.rpc\_id(1)
-
-    \# 2\. Kamera folgt dem eigenen Schiff
-
-    if GameState.players.has(local\_player\_id):
-
-        var p \= GameState.players\[local\_player\_id\]
-
-        var target\_x \= clamp(p.x, 72.0 \+ 600.0, 2184.0 \- 600.0) \# Zentriert im Viewport
-
-        game\_camera.global\_position \= lerp(game\_camera.global\_position, Vector2(target\_x, 380.0), dt \* 10.0)
+Der Port wird vor dem Netzwerkaufruf auf `1 … 65535` geprüft. Während eines
+Verbindungsversuchs werden alle Eingabefelder und Buttons deaktiviert.
 
 ---
 
-## 4\. Schritt 4.4: Overlay & Hilfe (`HelpDialog.tscn`)
+## 3. Lobby
 
-Ein modales Popup-Fenster, das per Tastendruck (`H` oder `Escape`) ein- und ausgeblendet werden kann.
+`Lobby.tscn` zeigt:
 
-### Szenenstruktur (`HelpDialog.tscn`):
+- die lokale Host-IP und den Port beim Host,
+- einen Wartetext auf Clients,
+- alle Spielernamen mit ihrer Farbe,
+- eine Host-Markierung,
+- die wichtigsten Spielregeln,
+- einen Start-Button nur für den Host.
 
-* `Control` (Root, Layout: Full Rect, visibel false bei Start)  
-  * `ColorRect` (Dunkles, halbtransparentes Overlay)  
-  * `PanelContainer` (Zentrierter Kasten)  
-    * `VBoxContainer`  
-      * `Label` ("So funktioniert die Schatzsuche")  
-      * `Label` (Regeln und Hinweise...)  
-      * `Button` (CloseButton \- "Schließen")
-
-### GDScript-Skript für die Hilfe (`HelpDialog.gd`):
-
-extends Control
-
-func \_input(event: InputEvent) \-\> void:
-
-    if event.is\_action\_pressed("toggle\_help") or (event is InputEventKey and event.pressed and event.keycode \== KEY\_H):
-
-        visible \= not visible
-
-    elif event.is\_action\_pressed("ui\_cancel") and visible:
-
-        visible \= false
-
-func \_on\_close\_button\_pressed() \-\> void:
-
-    visible \= false
+Der Start-Button ist erst ab zwei Spielern aktiv. `Enter` startet ebenfalls
+die Runde; `Escape` oder „Verlassen“ beendet die Sitzung sauber.
 
 ---
 
-## Fazit & Nächste Schritte:
+## 4. Spielansicht
 
-Mit dieser Godot-Struktur hast du die komplette Benutzeroberfläche, das performante `Line2D`\-Terrain-Rendering und die Multiplayer-Synchronisation erfolgreich in Godot übertragen. Du kannst das Projekt jetzt direkt in Godot testen (`F5` drücken) und mit dem Ausbau deiner neuronalen Netzwerke als Schiffssteuerung beginnen\!
+### 4.1 Welt und Kamera
+
+`GameView.tscn` trennt Welt und HUD:
+
+```text
+GameView
+├── World
+│   ├── SeabedRenderer
+│   ├── Ships
+│   └── Camera2D
+└── HUD (CanvasLayer)
+    └── Root
+        ├── PlayerStrip
+        ├── OverviewBar
+        ├── MeasurementPanel
+        ├── FinishedPanel
+        └── HelpDialog
+```
+
+Die Welt verwendet dieselben Pixelkoordinaten wie Python. Die Kamera liegt bei
+`x = 600 + camera_x`, wodurch die Umrechnung weiterhin
+`screen_x = world_x - camera_x` entspricht.
+
+Während `playing` folgt die Kamera weich dem eigenen Schiff. Nach Rundenende
+wird sie auf den Schatz zentriert und kann mit Pfeiltasten oder A/D über die
+gesamte Karte verschoben werden.
+
+### 4.2 Schiffe
+
+`ShipView.gd` zeichnet pro Spieler:
+
+- farbigen Rumpf,
+- Mast und Segel,
+- Spielernamen,
+- Markierung des lokalen Spielers.
+
+Positionen werden zwischen den Netzwerksnapshots geglättet, ohne den
+autoritativen Zustand zu verändern.
+
+### 4.3 Übersichtsbalken
+
+`OverviewBar.gd` zeigt:
+
+- die aktuelle Kameraposition,
+- den sichtbaren Kartenausschnitt,
+- farbige Positionen aller Spieler,
+- eine größere Markierung für den lokalen Spieler.
+
+---
+
+## 5. Meeresboden und Messungen
+
+`SeabedRenderer.gd` ist ein eigener `Node2D` mit `_draw()`.
+
+### Während der Runde
+
+Der Renderer liest ausschließlich:
+
+```text
+ClientSession.measurements
+ClientSession.last_measurement
+```
+
+Er zeichnet:
+
+- nur die bekannten lokalen Terrain-Patches,
+- weiße Messpunkte,
+- die letzte Tangente mit exakt 48 Pixel Gesamtbreite,
+- die animierte Sondenleine und Sonde.
+
+Das autoritative `GameManager.seabed` wird nie gelesen. Diese Regel gilt auch
+für die Host-Ansicht.
+
+### Nach Rundenende
+
+Erst wenn `ClientSession.released_terrain` gefüllt ist, zeichnet der Renderer:
+
+- das komplette gefüllte Terrain,
+- die grüne Profilkante,
+- die freigegebene Schatzposition.
+
+Zustandsänderungen rufen `queue_redraw()` auf. Dadurch wird das gecachte
+Godot-Zeichenergebnis nur bei Bedarf neu aufgebaut.
+
+---
+
+## 6. HUD und Bedienung
+
+Das HUD enthält:
+
+- Rundennummer und UDP-Port,
+- Spielerfarben und verbleibende Sonden,
+- Tiefe, Gefälle und Richtungshinweis der letzten Messung,
+- kontextabhängige Steuerungshinweise,
+- Hilfe-Button,
+- Ergebnisdialog und Host-Neustart.
+
+Steuerung:
+
+| Eingabe | Wirkung |
+|---|---|
+| `←` / `→` oder physisch `A` / `D` | Schiff beziehungsweise Ergebniskarte bewegen |
+| `Leertaste`, `↓` oder `S` | Sonde absenken |
+| `H` | Hilfe öffnen oder schließen |
+| `Enter` | Runde in der Lobby starten (Host) |
+| `R` | neue Runde nach Rundenende (Host) |
+| `Escape` | Hilfe schließen oder Sitzung verlassen |
+
+Während die Hilfe geöffnet ist, wird keine Bewegungs- oder Sondenanfrage
+gesendet.
+
+---
+
+## 7. Ergebnis und Neustart
+
+`FinishedPanel` unterscheidet:
+
+- Gewinner mit Name,
+- Ende durch verbrauchte Sonden,
+- Host mit aktivem Neustart-Button,
+- Clients mit Wartetext.
+
+Beim Neustart löscht `ClientSession.reset_round()` alte Messungen und das
+freigegebene Terrain. `GameView` bleibt bestehen und aktualisiert Schiffe, HUD
+und Renderer über den zuverlässigen Start-Snapshot.
+
+---
+
+## 8. Auflösung und Layout
+
+`project.godot` verwendet den Referenz-Viewport `1200 × 760` und
+`canvas_items`-Stretching. Vollbild-Hintergründe und Dialoge nutzen
+Full-Rect-Anker; die eigentliche Spielansicht behält die Koordinaten der
+Python-Referenz bei.
+
+Container verwalten Menü-, Lobby- und Dialoginhalte. Feste Offsets werden nur
+für das pixelgenaue Spiel-HUD verwendet.
+
+---
+
+## 9. Tests
+
+### Gesamter Vertragslauf
+
+Mit Godot 4.2+:
+
+```powershell
+godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
+  --script res://tests/run_phase4.gd
+```
+
+Der Lauf enthält alle Tests aus Phase 2 und 3 sowie Szenenprüfungen für:
+
+- Main-Szenencontainer und globalen Hinweis,
+- Menü-Eingaben und Buttons,
+- Lobby-Spielerliste und Start-Button,
+- Renderer, Schiffscontainer und Kamera,
+- HUD, Ergebnisdialog und Hilfe,
+- öffentliche Methoden von Hilfe und Schiffsdarstellung.
+
+### LAN-Smoke-Test
+
+Der Zwei-Prozess-Test aus Phase 3 prüft weiterhin die echte ENet-Verbindung:
+
+```powershell
+# Terminal 1
+godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
+  --script res://tests/network_smoke_peer.gd -- --role=host --port=50416
+
+# Terminal 2
+godot --headless --path C:\Users\zorn_a\Code\gradient_descent_lan `
+  --script res://tests/network_smoke_peer.gd -- --role=client --port=50416
+```
+
+Für die visuelle Abnahme wird das Projekt anschließend einmal normal im
+Godot-Editor gestartet und mit zwei lokalen Fenstern gespielt.
+
+---
+
+## 10. Abnahmekriterien für Phase 4
+
+- [x] Hauptmenü mit Name, IP, Port, Hosten und Beitreten ist implementiert.
+- [x] Lobby mit Spielern, Host-Adresse und Startberechtigung ist implementiert.
+- [x] Szenenwechsel reagieren auf Netzwerk- und Rundenstatus.
+- [x] Öffentliche Spielerzustände erzeugen und aktualisieren Schiffe und HUD.
+- [x] Kamera folgt dem eigenen Schiff und ist nach Rundenende steuerbar.
+- [x] Übersichtsbalken zeigt Kamera und Spielerpositionen.
+- [x] Eigene Mess-Patches, Messpunkte und 48-Pixel-Tangente werden gezeichnet.
+- [x] Sondenanimation ist implementiert.
+- [x] Gesamtterrain und Schatz erscheinen erst nach Rundenende.
+- [x] Hilfe, Ergebnisdialog und Neustart sind implementiert.
+- [x] UI greift nicht auf das autoritative Terrain zu.
+- [x] Szenenvertragstests sind vorhanden.
+- [x] Alle `res://`-Ressourcenpfade existieren.
+- [x] `git diff --check` meldet keine Formatfehler.
+- [ ] Godot-Headless-Tests laufen ohne Parser- oder Laufzeitfehler.
+- [ ] Visueller Test mit Host und Client ist bestanden.
+
+Die letzten beiden Punkte bleiben offen, weil in dieser Umgebung kein
+Godot-Befehl im `PATH` verfügbar ist.
