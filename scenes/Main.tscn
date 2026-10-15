@@ -1,16 +1,16 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://b2ld88wuqhaps"]
 
-[ext_resource type="Script" path="res://scripts/scenes/Main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://temg8hbwmxjw" path="res://scripts/scenes/Main.gd" id="1_main"]
 
-[node name="Main" type="Node"]
+[node name="Main" type="Node" unique_id=149983276]
 script = ExtResource("1_main")
 
-[node name="SceneContainer" type="Node" parent="."]
+[node name="SceneContainer" type="Node" parent="." unique_id=1481037206]
 
-[node name="OverlayLayer" type="CanvasLayer" parent="."]
+[node name="OverlayLayer" type="CanvasLayer" parent="." unique_id=1404184586]
 layer = 10
 
-[node name="NoticeLabel" type="Label" parent="OverlayLayer"]
+[node name="NoticeLabel" type="Label" parent="OverlayLayer" unique_id=1763410346]
 visible = false
 offset_left = 225.0
 offset_top = 92.0

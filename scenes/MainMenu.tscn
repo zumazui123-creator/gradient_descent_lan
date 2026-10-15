@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://bt6p1srnh8nyi"]
 
-[ext_resource type="Script" path="res://scripts/scenes/MainMenu.gd" id="1_menu"]
+[ext_resource type="Script" uid="uid://k2880hxninc7" path="res://scripts/scenes/MainMenu.gd" id="1_menu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.0588235, 0.109804, 0.211765, 1)
@@ -14,7 +14,7 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=1435353206]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +23,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=547546504]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -33,7 +33,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.027451, 0.0509804, 0.12549, 1)
 
-[node name="Brand" type="Label" parent="."]
+[node name="Brand" type="Label" parent="." unique_id=1114494913]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 20.0
@@ -43,7 +43,7 @@ theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
 theme_override_font_sizes/font_size = 23
 text = "GRADIENT DESCENT"
 
-[node name="BrandSubtitle" type="Label" parent="."]
+[node name="BrandSubtitle" type="Label" parent="." unique_id=965383202]
 layout_mode = 0
 offset_left = 34.0
 offset_top = 55.0
@@ -53,7 +53,7 @@ theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
 theme_override_font_sizes/font_size = 15
 text = "Schatzsuche im LAN"
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=1294152650]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -61,42 +61,42 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="Center"]
+[node name="Panel" type="PanelContainer" parent="Center" unique_id=1839042441]
 custom_minimum_size = Vector2(680, 530)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
-[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+[node name="Margin" type="MarginContainer" parent="Center/Panel" unique_id=2038157252]
 layout_mode = 2
 theme_override_constants/margin_left = 54
 theme_override_constants/margin_top = 34
 theme_override_constants/margin_right = 54
 theme_override_constants/margin_bottom = 34
 
-[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin"]
+[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin" unique_id=1832140022]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Center/Panel/Margin/Content"]
+[node name="Title" type="Label" parent="Center/Panel/Margin/Content" unique_id=396047816]
 layout_mode = 2
 theme_override_font_sizes/font_size = 36
 text = "Gemeinsam auf Schatzsuche"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Center/Panel/Margin/Content"]
+[node name="Subtitle" type="Label" parent="Center/Panel/Margin/Content" unique_id=1731138827]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
 text = "Ein Host, zwei bis vier Spieler, eine unbekannte Seekarte."
 horizontal_alignment = 1
 
-[node name="Separator" type="HSeparator" parent="Center/Panel/Margin/Content"]
+[node name="Separator" type="HSeparator" parent="Center/Panel/Margin/Content" unique_id=1020048174]
 layout_mode = 2
 
-[node name="NameLabel" type="Label" parent="Center/Panel/Margin/Content"]
+[node name="NameLabel" type="Label" parent="Center/Panel/Margin/Content" unique_id=753412720]
 layout_mode = 2
 text = "Dein Name"
 
-[node name="NameInput" type="LineEdit" parent="Center/Panel/Margin/Content"]
+[node name="NameInput" type="LineEdit" parent="Center/Panel/Margin/Content" unique_id=1762691275]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "Spieler"
@@ -104,52 +104,52 @@ placeholder_text = "Spielername"
 max_length = 18
 select_all_on_focus = true
 
-[node name="AddressLabel" type="Label" parent="Center/Panel/Margin/Content"]
+[node name="AddressLabel" type="Label" parent="Center/Panel/Margin/Content" unique_id=1741628022]
 layout_mode = 2
 text = "Host-IP (zum Beitreten)"
 
-[node name="AddressInput" type="LineEdit" parent="Center/Panel/Margin/Content"]
+[node name="AddressInput" type="LineEdit" parent="Center/Panel/Margin/Content" unique_id=50588689]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "127.0.0.1"
 placeholder_text = "192.168.1.42"
 max_length = 80
 
-[node name="PortLabel" type="Label" parent="Center/Panel/Margin/Content"]
+[node name="PortLabel" type="Label" parent="Center/Panel/Margin/Content" unique_id=98365263]
 layout_mode = 2
 text = "UDP-Port"
 
-[node name="PortInput" type="LineEdit" parent="Center/Panel/Margin/Content"]
+[node name="PortInput" type="LineEdit" parent="Center/Panel/Margin/Content" unique_id=2089871663]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "50415"
-placeholder_text = "50415"
+text = "3131"
+placeholder_text = "3131"
 max_length = 5
 
-[node name="Buttons" type="HBoxContainer" parent="Center/Panel/Margin/Content"]
+[node name="Buttons" type="HBoxContainer" parent="Center/Panel/Margin/Content" unique_id=317992483]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="HostButton" type="Button" parent="Center/Panel/Margin/Content/Buttons"]
+[node name="HostButton" type="Button" parent="Center/Panel/Margin/Content/Buttons" unique_id=1530330950]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Spiel hosten"
 
-[node name="JoinButton" type="Button" parent="Center/Panel/Margin/Content/Buttons"]
+[node name="JoinButton" type="Button" parent="Center/Panel/Margin/Content/Buttons" unique_id=2119209069]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Beitreten"
 
-[node name="StatusLabel" type="Label" parent="Center/Panel/Margin/Content"]
+[node name="StatusLabel" type="Label" parent="Center/Panel/Margin/Content" unique_id=398918988]
 custom_minimum_size = Vector2(0, 26)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
 text = "Gleiche WLAN-/LAN-Verbindung erforderlich"
 horizontal_alignment = 1
 
-[node name="ControlsLabel" type="Label" parent="Center/Panel/Margin/Content"]
+[node name="ControlsLabel" type="Label" parent="Center/Panel/Margin/Content" unique_id=461845796]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
 text = "← / → bewegen   ·   Leertaste messen   ·   H Hilfe"
