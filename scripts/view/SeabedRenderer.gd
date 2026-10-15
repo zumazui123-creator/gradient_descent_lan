@@ -115,7 +115,7 @@ func _draw_released_terrain() -> void:
 
 func _draw_measurements() -> void:
 	for measurement: Dictionary in ClientSession.measurements:
-		var measurement_color := _measurement_color(int(measurement.get("player_id", 0)))
+		var measurement_color := RED #_measurement_color(int(measurement.get("player_id", 0)))
 		var patch := _to_points(measurement.get("patch", []))
 		if patch.size() >= 2:
 			draw_polyline(patch, measurement_color, 3.0, true)

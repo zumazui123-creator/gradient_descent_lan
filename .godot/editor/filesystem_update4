@@ -1,0 +1,3 @@
+res://scripts/model/GameConstants.gd
+res://scenes/GameView.tscn
+res://scripts/view/SeabedRenderer.gd
