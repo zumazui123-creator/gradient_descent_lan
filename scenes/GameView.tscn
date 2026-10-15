@@ -1,9 +1,9 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://bbcremv51x3sn"]
 
-[ext_resource type="Script" path="res://scripts/scenes/GameView.gd" id="1_game"]
-[ext_resource type="Script" path="res://scripts/view/SeabedRenderer.gd" id="2_seabed"]
+[ext_resource type="Script" uid="uid://c15fr43axutw2" path="res://scripts/scenes/GameView.gd" id="1_game"]
+[ext_resource type="Script" uid="uid://cwdgfixjbukk2" path="res://scripts/view/SeabedRenderer.gd" id="2_seabed"]
 [ext_resource type="PackedScene" path="res://scenes/components/HelpDialog.tscn" id="3_help"]
-[ext_resource type="Script" path="res://scripts/view/OverviewBar.gd" id="4_overview"]
+[ext_resource type="Script" uid="uid://byvv4teicdgne" path="res://scripts/view/OverviewBar.gd" id="4_overview"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_measurement"]
 bg_color = Color(0.0588235, 0.109804, 0.211765, 0.98)
@@ -29,23 +29,22 @@ corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
 
-[node name="GameView" type="Node2D"]
+[node name="GameView" type="Node2D" unique_id=884148382]
 script = ExtResource("1_game")
 
-[node name="World" type="Node2D" parent="."]
+[node name="World" type="Node2D" parent="." unique_id=1214070225]
 
-[node name="SeabedRenderer" type="Node2D" parent="World"]
+[node name="SeabedRenderer" type="Node2D" parent="World" unique_id=475528387]
 script = ExtResource("2_seabed")
 
-[node name="Ships" type="Node2D" parent="World"]
+[node name="Ships" type="Node2D" parent="World" unique_id=513081406]
 
-[node name="Camera2D" type="Camera2D" parent="World"]
+[node name="Camera2D" type="Camera2D" parent="World" unique_id=1812550785]
 position = Vector2(600, 380)
-enabled = true
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1145761076]
 
-[node name="Root" type="Control" parent="HUD"]
+[node name="Root" type="Control" parent="HUD" unique_id=1955120487]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -54,7 +53,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Brand" type="Label" parent="HUD/Root"]
+[node name="Brand" type="Label" parent="HUD/Root" unique_id=1893010427]
+layout_mode = 0
 offset_left = 32.0
 offset_top = 20.0
 offset_right = 420.0
@@ -63,7 +63,8 @@ theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
 theme_override_font_sizes/font_size = 23
 text = "GRADIENT DESCENT"
 
-[node name="Title" type="Label" parent="HUD/Root"]
+[node name="Title" type="Label" parent="HUD/Root" unique_id=1776362836]
+layout_mode = 0
 offset_left = 72.0
 offset_top = 101.0
 offset_right = 800.0
@@ -71,7 +72,8 @@ offset_bottom = 135.0
 theme_override_font_sizes/font_size = 23
 text = "Finde den tiefsten Punkt des Meeresbodens"
 
-[node name="RoundLabel" type="Label" parent="HUD/Root"]
+[node name="RoundLabel" type="Label" parent="HUD/Root" unique_id=493842128]
+layout_mode = 0
 offset_left = 900.0
 offset_top = 28.0
 offset_right = 1168.0
@@ -80,7 +82,8 @@ theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
 text = "Runde 0  ·  UDP 3131"
 horizontal_alignment = 2
 
-[node name="MapLabel" type="Label" parent="HUD/Root"]
+[node name="MapLabel" type="Label" parent="HUD/Root" unique_id=995413680]
+layout_mode = 0
 offset_left = 1000.0
 offset_top = 105.0
 offset_right = 1128.0
@@ -89,14 +92,16 @@ theme_override_colors/font_color = Color(0.25098, 0.901961, 1, 1)
 text = "KARTE 2×"
 horizontal_alignment = 2
 
-[node name="PlayerStrip" type="HBoxContainer" parent="HUD/Root"]
+[node name="PlayerStrip" type="HBoxContainer" parent="HUD/Root" unique_id=1889232700]
+layout_mode = 0
 offset_left = 72.0
 offset_top = 143.0
 offset_right = 1128.0
 offset_bottom = 173.0
 theme_override_constants/separation = 16
 
-[node name="OverviewBar" type="Control" parent="HUD/Root"]
+[node name="OverviewBar" type="Control" parent="HUD/Root" unique_id=1030745177]
+anchors_preset = 0
 offset_left = 72.0
 offset_top = 169.0
 offset_right = 1128.0
@@ -104,7 +109,8 @@ offset_bottom = 181.0
 mouse_filter = 2
 script = ExtResource("4_overview")
 
-[node name="SurfaceLabel" type="Label" parent="HUD/Root"]
+[node name="SurfaceLabel" type="Label" parent="HUD/Root" unique_id=1807332811]
+layout_mode = 0
 offset_left = 84.0
 offset_top = 198.0
 offset_right = 300.0
@@ -113,27 +119,28 @@ theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
 theme_override_font_sizes/font_size = 13
 text = "MEERESOBERFLÄCHE"
 
-[node name="LeaveButton" type="Button" parent="HUD/Root"]
+[node name="LeaveButton" type="Button" parent="HUD/Root" unique_id=956014053]
+layout_mode = 0
 offset_left = 1030.0
 offset_top = 62.0
 offset_right = 1168.0
 offset_bottom = 98.0
-mouse_filter = 0
 text = "Menü  Esc"
 
-[node name="MeasurementPanel" type="PanelContainer" parent="HUD/Root"]
+[node name="MeasurementPanel" type="PanelContainer" parent="HUD/Root" unique_id=477167019]
+layout_mode = 0
 offset_left = 72.0
 offset_top = 682.0
 offset_right = 1128.0
 offset_bottom = 749.0
-mouse_filter = 0
 theme_override_styles/panel = SubResource("StyleBox_measurement")
 
-[node name="Content" type="Control" parent="HUD/Root/MeasurementPanel"]
+[node name="Content" type="Control" parent="HUD/Root/MeasurementPanel" unique_id=714135705]
 layout_mode = 2
 mouse_filter = 1
 
-[node name="MeasurementLabel" type="Label" parent="HUD/Root/MeasurementPanel/Content"]
+[node name="MeasurementLabel" type="Label" parent="HUD/Root/MeasurementPanel/Content" unique_id=1372724359]
+layout_mode = 0
 offset_left = 19.0
 offset_top = 10.0
 offset_right = 850.0
@@ -142,7 +149,8 @@ theme_override_colors/font_color = Color(1, 0.74902, 0.337255, 1)
 theme_override_font_sizes/font_size = 18
 text = "Noch keine Messung: Der Boden ist verborgen."
 
-[node name="ControlsLabel" type="Label" parent="HUD/Root/MeasurementPanel/Content"]
+[node name="ControlsLabel" type="Label" parent="HUD/Root/MeasurementPanel/Content" unique_id=617419054]
+layout_mode = 0
 offset_left = 19.0
 offset_top = 38.0
 offset_right = 850.0
@@ -151,59 +159,59 @@ theme_override_colors/font_color = Color(0.537255, 0.67451, 0.772549, 1)
 theme_override_font_sizes/font_size = 13
 text = "← → / A D bewegen   ·   Leertaste / ↓ / S Sonde (3 s Anker)   ·   H Hilfe"
 
-[node name="HelpButton" type="Button" parent="HUD/Root/MeasurementPanel/Content"]
+[node name="HelpButton" type="Button" parent="HUD/Root/MeasurementPanel/Content" unique_id=1207856901]
+layout_mode = 0
 offset_left = 920.0
 offset_top = 10.0
 offset_right = 1042.0
 offset_bottom = 52.0
-mouse_filter = 0
 text = "Hilfe  H"
 
-[node name="FinishedPanel" type="PanelContainer" parent="HUD/Root"]
+[node name="FinishedPanel" type="PanelContainer" parent="HUD/Root" unique_id=596967432]
 visible = false
+layout_mode = 0
 offset_left = 328.0
 offset_top = 289.0
 offset_right = 872.0
 offset_bottom = 489.0
-mouse_filter = 0
 theme_override_styles/panel = SubResource("StyleBox_finished")
 
-[node name="Margin" type="MarginContainer" parent="HUD/Root/FinishedPanel"]
+[node name="Margin" type="MarginContainer" parent="HUD/Root/FinishedPanel" unique_id=1910788916]
 layout_mode = 2
 theme_override_constants/margin_left = 32
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 24
 
-[node name="Content" type="VBoxContainer" parent="HUD/Root/FinishedPanel/Margin"]
+[node name="Content" type="VBoxContainer" parent="HUD/Root/FinishedPanel/Margin" unique_id=617833577]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="Title" type="Label" parent="HUD/Root/FinishedPanel/Margin/Content"]
+[node name="Title" type="Label" parent="HUD/Root/FinishedPanel/Margin/Content" unique_id=686697588]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.74902, 0.337255, 1)
 theme_override_font_sizes/font_size = 24
 text = "RUNDE BEENDET"
 horizontal_alignment = 1
 
-[node name="ResultLabel" type="Label" parent="HUD/Root/FinishedPanel/Margin/Content"]
+[node name="ResultLabel" type="Label" parent="HUD/Root/FinishedPanel/Margin/Content" unique_id=157553920]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Alle Sonden wurden verbraucht!"
 horizontal_alignment = 1
 
-[node name="RestartButton" type="Button" parent="HUD/Root/FinishedPanel/Margin/Content"]
+[node name="RestartButton" type="Button" parent="HUD/Root/FinishedPanel/Margin/Content" unique_id=1309608584]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Neue Runde  R"
 
-[node name="WaitingLabel" type="Label" parent="HUD/Root/FinishedPanel/Margin/Content"]
+[node name="WaitingLabel" type="Label" parent="HUD/Root/FinishedPanel/Margin/Content" unique_id=219262430]
 layout_mode = 2
 text = "Warte auf die nächste Runde des Hosts."
 horizontal_alignment = 1
 
-[node name="HelpDialog" parent="HUD/Root" instance=ExtResource("3_help")]
+[node name="HelpDialog" parent="HUD/Root" unique_id=1092095493 instance=ExtResource("3_help")]
 
 [connection signal="pressed" from="HUD/Root/LeaveButton" to="." method="_on_leave_button_pressed"]
 [connection signal="pressed" from="HUD/Root/MeasurementPanel/Content/HelpButton" to="." method="_on_help_button_pressed"]

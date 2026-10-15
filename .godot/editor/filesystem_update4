@@ -1,3 +1,14 @@
 res://scenes/MainMenu.tscn
 res://scenes/Main.tscn
 res://scenes/Lobby.tscn
+res://scenes/GameView.tscn
+res://scripts/model/GameConstants.gd
+res://scenes/components/HelpDialog.tscn
+res://scripts/autoload/ClientSession.gd
+res://scripts/autoload/GameManager.gd
+res://scripts/autoload/NetworkManager.gd
+res://scripts/model/PlayerState.gd
+res://scripts/model/Seabed.gd
+res://scripts/scenes/GameView.gd
+res://scripts/scenes/Lobby.gd
+res://scripts/view/SeabedRenderer.gd

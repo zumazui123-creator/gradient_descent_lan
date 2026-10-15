@@ -7,6 +7,7 @@ const CYAN := Color("#40e6ff")
 const GOLD := Color("#ffbf56")
 const GREEN := Color("#74f49d")
 const WHITE := Color("#e5f6ff")
+const RED := Color("bd0c66ff")
 const FLOOR_FILL := Color("#14323c")
 
 var _probe_animation: Dictionary = {}
@@ -40,7 +41,7 @@ func _process(delta: float) -> void:
 	_probe_animation["age"] = float(_probe_animation["age"]) + maxf(delta, 0.0)
 	_probe_animation["y"] = minf(
 		float(_probe_animation["target"]),
-		float(_probe_animation["y"]) + maxf(delta, 0.0) * 680.0
+		float(_probe_animation["y"]) + maxf(delta/2, 0.0) * 680.0
 	)
 	if float(_probe_animation["age"]) > GameConstants.PROBE_COOLDOWN_SECONDS:
 		_probe_animation.clear()
@@ -123,11 +124,11 @@ func _draw_measurements() -> void:
 			4.0,
 			measurement_color
 		)
-		_draw_tangent(measurement, measurement_color, 2.0)
+		_draw_tangent(measurement, 2.0)
 
 	if ClientSession.last_measurement.is_empty():
 		return
-	_draw_tangent(ClientSession.last_measurement, GOLD, 3.0)
+	_draw_tangent(ClientSession.last_measurement, 3.0)
 	draw_circle(
 		Vector2(
 			float(ClientSession.last_measurement.get("x", 0.0)),
@@ -138,7 +139,7 @@ func _draw_measurements() -> void:
 	)
 
 
-func _draw_tangent(measurement: Dictionary, color: Color, width: float) -> void:
+func _draw_tangent(measurement: Dictionary, width: float, color: Color = RED ) -> void:
 	var center_x := float(measurement.get("x", 0.0))
 	var center_y := float(measurement.get("y", 0.0))
 	var slope := float(measurement.get("slope", 0.0))
