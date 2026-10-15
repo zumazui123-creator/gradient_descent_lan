@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenes/Main.gd" id="1_main"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="SceneContainer" type="Node" parent="."]
+
+[node name="OverlayLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="NoticeLabel" type="Label" parent="OverlayLayer"]
+visible = false
+offset_left = 225.0
+offset_top = 92.0
+offset_right = 975.0
+offset_bottom = 139.0
+text = "Hinweis"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,29 @@
+; Engine configuration file.
+; Edit this file through Godot's project settings where possible.
+
+config_version=5
+
+[application]
+
+config/name="Gradient Descent – Schatzsuche im LAN"
+run/main_scene="res://scenes/Main.tscn"
+
+[autoload]
+
+GameManager="*res://scripts/autoload/GameManager.gd"
+NetworkManager="*res://scripts/autoload/NetworkManager.gd"
+ClientSession="*res://scripts/autoload/ClientSession.gd"
+
+[display]
+
+window/size/viewport_width=1200
+window/size/viewport_height=760
+window/size/window_width_override=1200
+window/size/window_height_override=760
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.027451, 0.0509804, 0.12549, 1)
