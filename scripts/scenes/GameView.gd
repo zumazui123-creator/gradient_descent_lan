@@ -31,7 +31,7 @@ var _camera_x := 0.0
 
 func _ready() -> void:
 	NetworkManager.state_received.connect(_on_state_received)
-	NetworkManager.private_probe_received.connect(_on_private_probe_received)
+	NetworkManager.measurement_received.connect(_on_measurement_received)
 	NetworkManager.round_finished.connect(_on_round_finished)
 	_last_snapshot = ClientSession.public_state.duplicate(true)
 	_refresh_from_snapshot(_last_snapshot)
@@ -120,7 +120,7 @@ func _on_state_received(snapshot: Dictionary) -> void:
 	_refresh_from_snapshot(_last_snapshot)
 
 
-func _on_private_probe_received(result: Dictionary) -> void:
+func _on_measurement_received(result: Dictionary) -> void:
 	seabed_renderer.start_probe_animation(result)
 	_update_measurement()
 
@@ -182,8 +182,14 @@ func _sync_player_strip(snapshot: Dictionary) -> void:
 
 	for player: Dictionary in snapshot.get("players", []):
 		var label := Label.new()
-		label.text = "● %s  %d/%d" % [
-			str(player.get("name", "Spieler")).substr(0, 14),
+		var team_suffix := (
+			" [T%d]" % int(player.get("team_id", 0))
+			if bool(snapshot.get("team_mode", false))
+			else ""
+		)
+		label.text = "● %s%s  %d/%d" % [
+			str(player.get("name", "Spieler")).substr(0, 10),
+			team_suffix,
 			int(player.get("probes_left", 0)),
 			GameConstants.PROBES_PER_PLAYER,
 		]
@@ -191,7 +197,7 @@ func _sync_player_strip(snapshot: Dictionary) -> void:
 			"font_color",
 			Color.from_string(str(player.get("color", "#ffffff")), Color.WHITE)
 		)
-		label.add_theme_font_size_override("font_size", 15)
+		label.add_theme_font_size_override("font_size", 13)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		player_strip.add_child(label)
 
@@ -217,7 +223,7 @@ func _update_measurement() -> void:
 	controls_label.text = (
 		"← → / A D Karte ansehen   ·   H Hilfe"
 		if phase == GameManager.PHASE_FINISHED
-		else "← → / A D bewegen   ·   Leertaste / ↓ / S Sonde   ·   H Hilfe"
+		else "← → / A D bewegen   ·   Leertaste / ↓ / S Sonde (3 s Anker)   ·   H Hilfe"
 	)
 
 
@@ -228,16 +234,19 @@ func _update_finished_panel(snapshot: Dictionary) -> void:
 		return
 
 	var winner_id: Variant = snapshot.get("winner")
+	var winner_team_value: Variant = snapshot.get("winner_team")
+	var winner_team := int(winner_team_value) if winner_team_value != null else 0
 	var winner_name := ""
 	for player: Dictionary in snapshot.get("players", []):
 		if player.get("id") == winner_id:
 			winner_name = str(player.get("name", "Spieler"))
 			break
-	finished_label.text = (
-		"%s hat den Schatz gefunden!" % winner_name
-		if not winner_name.is_empty()
-		else "Alle Sonden wurden verbraucht!"
-	)
+	if not winner_name.is_empty() and bool(snapshot.get("team_mode", false)):
+		finished_label.text = "Team %d gewinnt! %s fand den Schatz." % [winner_team, winner_name]
+	elif not winner_name.is_empty():
+		finished_label.text = "%s hat den Schatz gefunden!" % winner_name
+	else:
+		finished_label.text = "Alle Sonden wurden verbraucht!"
 
 	var players: Array = snapshot.get("players", [])
 	var player_count := players.size()

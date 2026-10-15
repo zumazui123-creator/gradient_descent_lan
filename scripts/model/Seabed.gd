@@ -61,8 +61,9 @@ func slope_at(world_x: float) -> float:
 
 
 func patch_at(world_x: float) -> Array[Vector2]:
-	var left_x := maxi(GameConstants.WORLD_LEFT, int(world_x) - 55)
-	var right_x := mini(GameConstants.WORLD_RIGHT, int(world_x) + 55)
+	var half_curve := int(GameConstants.MEASUREMENT_CURVE_LENGTH / 2.0)
+	var left_x := maxi(GameConstants.WORLD_LEFT, int(world_x) - half_curve)
+	var right_x := mini(GameConstants.WORLD_RIGHT, int(world_x) + half_curve)
 	var patch: Array[Vector2] = []
 
 	for sample_x in range(left_x, right_x + 1, 5):

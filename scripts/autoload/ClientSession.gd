@@ -21,10 +21,11 @@ func apply_public_state(snapshot: Dictionary) -> void:
 	public_state_changed.emit(public_state)
 
 
-func store_private_measurement(result: Dictionary) -> void:
+func store_measurement(result: Dictionary) -> void:
 	var safe_result: Dictionary = result.duplicate(true)
 	measurements.append(safe_result)
-	last_measurement = safe_result
+	if int(safe_result.get("player_id", local_player_id)) == local_player_id:
+		last_measurement = safe_result
 	measurement_received.emit(safe_result)
 
 

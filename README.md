@@ -2,20 +2,26 @@
 
 ## Godot-Port (Phase 4)
 
-Der laufende Port liegt direkt in diesem Ordner und benötigt **Godot 4.7 oder
+Der laufende Port liegt direkt in diesem Ordner und benötigt **Godot 4.8 oder
 neuer**. `project.godot` im Godot Project Manager importieren und das Projekt
 mit **F6/F5** starten. Für einen lokalen Mehrspieler-Test zwei Instanzen öffnen:
 Eine Instanz hostet, die zweite verbindet sich mit `127.0.0.1`. Der Godot-Port
-nutzt ENet über **UDP-Port 50415**.
+nutzt ENet über **UDP-Port 3131**.
 
-Das Projekt deklariert `4.7` als Engine-Feature und prüft die Mindestversion
+Das Projekt deklariert `4.8` als Engine-Feature und prüft die Mindestversion
 auch im automatischen Testlauf. Ältere Godot-Versionen werden nicht unterstützt.
+
+In der Lobby legt der Host fest, ob nur eigene oder alle Messungen sichtbar
+sind. Optional können bis zu sechs Spieler frei auf drei Teams verteilt werden,
+etwa als 2 gegen 2, 3 gegen 3 oder 2 gegen 1 gegen 3. Jede Sonde verankert das
+Schiff für drei Sekunden. Messkurven- und Tangentenlänge stehen zentral in
+`GameConstants.gd`.
 
 Die automatischen Prüfskripte können mit einer Godot-Kommandozeile ausgeführt
 werden:
 
 ```bash
-godot --headless --path . --script res://tests/run_phase4.gd
+godot --headless --path . res://tests/RunPhase4.tscn
 ```
 
 Die folgende Beschreibung dokumentiert weiterhin die Python-Referenzversion,

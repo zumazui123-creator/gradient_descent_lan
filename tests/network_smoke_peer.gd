@@ -3,7 +3,7 @@ extends SceneTree
 const TEST_TIMEOUT_SECONDS := 12.0
 
 var _role := ""
-var _port := 50416
+var _port := 3132
 var _done := false
 var _round_requested := false
 
@@ -18,7 +18,7 @@ func _start() -> void:
 	NetworkManager.server_disconnected.connect(_on_server_disconnected)
 	NetworkManager.state_received.connect(_on_state_received)
 	NetworkManager.round_started.connect(_on_round_started)
-	NetworkManager.private_probe_received.connect(_on_private_probe_received)
+	NetworkManager.measurement_received.connect(_on_measurement_received)
 	create_timer(TEST_TIMEOUT_SECONDS).timeout.connect(_on_timeout)
 
 	var error: Error
@@ -75,7 +75,7 @@ func _on_round_started(_round_number: int) -> void:
 	NetworkManager.request_probe()
 
 
-func _on_private_probe_received(result: Dictionary) -> void:
+func _on_measurement_received(result: Dictionary) -> void:
 	if _done or _role != "client":
 		return
 	if result.has("terrain") or result.has("treasure_x") or result.has("seed"):
@@ -84,7 +84,7 @@ func _on_private_probe_received(result: Dictionary) -> void:
 	if GameManager.seabed != null:
 		_fail("Client besitzt nach der Sonde ein autoritatives Terrain.")
 		return
-	_succeed("Client empfing ausschließlich sein privates Sondenergebnis.")
+	_succeed("Client empfing sein gemäß Lobbyregel freigegebenes Sondenergebnis.")
 
 
 func _on_connection_failed(message: String) -> void:

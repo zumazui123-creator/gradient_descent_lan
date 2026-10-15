@@ -1,4 +1,4 @@
-extends SceneTree
+extends Node
 
 const EngineVersionTests = preload("res://tests/test_engine_version.gd")
 const SeabedTests = preload("res://tests/test_seabed.gd")
@@ -7,7 +7,7 @@ const NetworkContractTests = preload("res://tests/test_network_contract.gd")
 const UIContractTests = preload("res://tests/test_ui_contract.gd")
 
 
-func _init() -> void:
+func _ready() -> void:
 	call_deferred("_run")
 
 
@@ -21,9 +21,9 @@ func _run() -> void:
 
 	if failures.is_empty():
 		print("Phase 4: alle Logik-, Netzwerk- und Szenenvertragstests bestanden.")
-		quit(0)
+		get_tree().quit(0)
 		return
 
 	for failure in failures:
 		push_error("Phase 4: " + failure)
-	quit(1)
+	get_tree().quit(1)

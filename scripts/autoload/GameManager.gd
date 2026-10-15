@@ -12,6 +12,9 @@ const PHASE_FINISHED := "finished"
 var phase := PHASE_LOBBY
 var round_number := 0
 var winner_id: Variant = null
+var winner_team_id: Variant = null
+var show_all_measurements := false
+var team_mode := false
 var players: Dictionary = {}
 var seabed: Seabed = null
 
@@ -20,6 +23,9 @@ func reset() -> void:
 	phase = PHASE_LOBBY
 	round_number = 0
 	winner_id = null
+	winner_team_id = null
+	show_all_measurements = false
+	team_mode = false
 	players.clear()
 	seabed = null
 	state_changed.emit(snapshot())
@@ -39,9 +45,58 @@ func add_player(player_id: int, player_name: String) -> PlayerState:
 
 	var start_x := (GameConstants.WORLD_LEFT + GameConstants.WORLD_RIGHT) / 2.0
 	var player := PlayerState.new(player_id, clean_name, _next_available_color(), start_x)
+	player.team_id = _next_balanced_team() if team_mode else 0
 	players[player_id] = player
 	state_changed.emit(snapshot())
 	return player
+
+
+func set_show_all_measurements(enabled: bool) -> bool:
+	if phase != PHASE_LOBBY:
+		return false
+	show_all_measurements = enabled
+	state_changed.emit(snapshot())
+	return true
+
+
+func set_team_mode(enabled: bool) -> bool:
+	if phase != PHASE_LOBBY:
+		return false
+	team_mode = enabled
+	var ordered_ids: Array = players.keys()
+	ordered_ids.sort()
+	for index in range(ordered_ids.size()):
+		var player: PlayerState = players[ordered_ids[index]]
+		player.team_id = index % 2 + 1 if team_mode else 0
+	state_changed.emit(snapshot())
+	return true
+
+
+func set_player_team(player_id: int, team_id: int) -> bool:
+	if phase != PHASE_LOBBY or not team_mode or not players.has(player_id):
+		return false
+	if team_id < 1 or team_id > GameConstants.MAX_TEAMS:
+		return false
+	var player: PlayerState = players[player_id]
+	player.team_id = team_id
+	state_changed.emit(snapshot())
+	return true
+
+
+func can_start_round() -> bool:
+	if phase != PHASE_LOBBY and phase != PHASE_FINISHED:
+		return false
+	if players.size() < GameConstants.MIN_PLAYERS:
+		return false
+	if not team_mode:
+		return true
+
+	var active_teams: Dictionary = {}
+	for player: PlayerState in players.values():
+		if player.team_id < 1 or player.team_id > GameConstants.MAX_TEAMS:
+			return false
+		active_teams[player.team_id] = true
+	return active_teams.size() >= 2
 
 
 func remove_player(player_id: int) -> void:
@@ -55,15 +110,14 @@ func remove_player(player_id: int) -> void:
 
 
 func start_round(seed_value: Variant = null) -> bool:
-	if phase != PHASE_LOBBY and phase != PHASE_FINISHED:
-		return false
-	if players.size() < GameConstants.MIN_PLAYERS:
+	if not can_start_round():
 		return false
 
 	var actual_seed := int(seed_value) if seed_value != null else randi()
 	seabed = Seabed.new(actual_seed)
 	round_number += 1
 	winner_id = null
+	winner_team_id = null
 	phase = PHASE_PLAYING
 
 	var ordered_ids: Array = players.keys()
@@ -97,8 +151,18 @@ func tick(delta: float) -> void:
 
 	var safe_delta := minf(maxf(delta, 0.0), 0.12)
 	for player: PlayerState in players.values():
+		var movement_delta := safe_delta
+		if player.probe_lock_remaining > 0.0:
+			var locked_delta := minf(player.probe_lock_remaining, safe_delta)
+			player.probe_lock_remaining = maxf(
+				0.0,
+				player.probe_lock_remaining - safe_delta
+			)
+			movement_delta -= locked_delta
+		if movement_delta <= 0.0:
+			continue
 		player.x = clampf(
-			player.x + player.axis * GameConstants.SHIP_SPEED * safe_delta,
+			player.x + player.axis * GameConstants.SHIP_SPEED * movement_delta,
 			GameConstants.WORLD_LEFT,
 			GameConstants.WORLD_RIGHT
 		)
@@ -119,6 +183,7 @@ func probe(player_id: int, now_seconds: float = -1.0) -> Dictionary:
 		return {}
 
 	player.last_probe_time = timestamp
+	player.probe_lock_remaining = GameConstants.PROBE_COOLDOWN_SECONDS
 	player.probes_left -= 1
 	player.measurements += 1
 
@@ -128,12 +193,15 @@ func probe(player_id: int, now_seconds: float = -1.0) -> Dictionary:
 
 	if found:
 		winner_id = player_id
+		winner_team_id = player.team_id if team_mode else null
 		phase = PHASE_FINISHED
 	elif _all_probes_used():
 		phase = PHASE_FINISHED
 
 	var result := {
 		"type": "probe_result",
+		"player_id": player_id,
+		"team_id": player.team_id,
 		"x": snappedf(player.x, 0.1),
 		"y": snappedf(depth, 0.1),
 		"slope": snappedf(slope, 0.001),
@@ -159,6 +227,9 @@ func snapshot() -> Dictionary:
 		"phase": phase,
 		"round": round_number,
 		"winner": winner_id,
+		"winner_team": winner_team_id,
+		"show_all_measurements": show_all_measurements,
+		"team_mode": team_mode,
 		"players": public_players,
 	}
 
@@ -175,6 +246,7 @@ func apply_public_snapshot(public_snapshot: Dictionary) -> bool:
 		return false
 
 	var rebuilt_players: Dictionary = {}
+	var incoming_team_mode := bool(public_snapshot.get("team_mode", false))
 	for entry: Variant in incoming_players:
 		if typeof(entry) != TYPE_DICTIONARY:
 			return false
@@ -200,11 +272,19 @@ func apply_public_snapshot(public_snapshot: Dictionary) -> bool:
 			GameConstants.PROBES_PER_PLAYER
 		)
 		player.measurements = maxi(0, int(player_data.get("measurements", 0)))
+		player.team_id = clampi(
+			int(player_data.get("team_id", 0)),
+			0,
+			GameConstants.MAX_TEAMS
+		) if incoming_team_mode else 0
 		rebuilt_players[player_id] = player
 
 	phase = incoming_phase
 	round_number = maxi(0, int(public_snapshot.get("round", 0)))
 	winner_id = public_snapshot.get("winner")
+	winner_team_id = public_snapshot.get("winner_team")
+	show_all_measurements = bool(public_snapshot.get("show_all_measurements", false))
+	team_mode = incoming_team_mode
 	players = rebuilt_players
 	seabed = null
 	state_changed.emit(snapshot())
@@ -218,6 +298,7 @@ func round_result() -> Dictionary:
 	return {
 		"type": "finished",
 		"winner": winner_id,
+		"winner_team": winner_team_id,
 		"terrain": seabed.public_profile(),
 		"treasure_x": seabed.treasure_x,
 	}
@@ -240,3 +321,11 @@ func _next_available_color() -> String:
 			return candidate
 
 	return GameConstants.PLAYER_COLORS[players.size() % GameConstants.PLAYER_COLORS.size()]
+
+
+func _next_balanced_team() -> int:
+	var counts := {1: 0, 2: 0}
+	for player: PlayerState in players.values():
+		if counts.has(player.team_id):
+			counts[player.team_id] += 1
+	return 1 if int(counts[1]) <= int(counts[2]) else 2

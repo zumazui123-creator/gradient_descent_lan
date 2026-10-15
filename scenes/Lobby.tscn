@@ -52,7 +52,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center" unique_id=845702590]
-custom_minimum_size = Vector2(990, 530)
+custom_minimum_size = Vector2(1040, 610)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
@@ -100,7 +100,22 @@ theme_override_constants/separation = 14
 [node name="Rules" type="VBoxContainer" parent="Center/Panel/Margin/Content/Body" unique_id=295832832]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 18
+theme_override_constants/separation = 12
+
+[node name="SettingsHeading" type="Label" parent="Center/Panel/Margin/Content/Body/Rules"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+text = "Spielregeln"
+
+[node name="AllMeasurementsToggle" type="CheckButton" parent="Center/Panel/Margin/Content/Body/Rules"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Alle Messungen sichtbar: AUS"
+
+[node name="TeamModeToggle" type="CheckButton" parent="Center/Panel/Margin/Content/Body/Rules"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Teamspiel: AUS"
 
 [node name="Rule1" type="Label" parent="Center/Panel/Margin/Content/Body/Rules" unique_id=1185945109]
 layout_mode = 2
@@ -109,7 +124,7 @@ autowrap_mode = 2
 
 [node name="Rule2" type="Label" parent="Center/Panel/Margin/Content/Body/Rules" unique_id=1074563711]
 layout_mode = 2
-text = "40 Sonden pro Spieler – nur eigene Messpunkte sind sichtbar."
+text = "40 Sonden, je 3 s vor Anker – nur eigene Messpunkte sind sichtbar."
 autowrap_mode = 2
 
 [node name="Rule3" type="Label" parent="Center/Panel/Margin/Content/Body/Rules" unique_id=2002009272]
@@ -134,3 +149,5 @@ text = "Runde starten  ↵"
 
 [connection signal="pressed" from="Center/Panel/Margin/Content/Actions/LeaveButton" to="." method="_on_leave_button_pressed"]
 [connection signal="pressed" from="Center/Panel/Margin/Content/Actions/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="toggled" from="Center/Panel/Margin/Content/Body/Rules/AllMeasurementsToggle" to="." method="_on_all_measurements_toggled"]
+[connection signal="toggled" from="Center/Panel/Margin/Content/Body/Rules/TeamModeToggle" to="." method="_on_team_mode_toggled"]

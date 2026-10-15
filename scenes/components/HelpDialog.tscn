@@ -71,7 +71,7 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/line_spacing = 10
 theme_override_font_sizes/font_size = 16
-text = "Bewege dein Schiff mit ← / → oder A / D.\nLeertaste, ↓ oder S senkt eine Sonde ab.\nDu erhältst Tiefe und Gefälle nur am Messpunkt.\nSteigt die Tiefe nach rechts, suche weiter rechts.\nEin ebenes lokales Tal muss nicht das tiefste Tal sein.\n40 Sonden pro Spieler; wer den Schatz zuerst trifft, gewinnt.\nDas Spielfeld ist doppelt so breit; die Kamera folgt deinem Schiff.\nAlle spielen auf derselben Karte. Nur eigene Messungen sind sichtbar.\nNach der Runde kannst du die Karte mit ← / → ansehen."
+text = "Bewege dein Schiff mit ← / → oder A / D.\nLeertaste, ↓ oder S senkt eine Sonde ab.\nWährend der dreisekündigen Messung liegt das Schiff vor Anker.\nDu erhältst Tiefe und Gefälle nur am Messpunkt.\nSteigt die Tiefe nach rechts, suche weiter rechts.\nEin ebenes lokales Tal muss nicht das tiefste Tal sein.\n40 Sonden pro Spieler; wer den Schatz zuerst trifft, gewinnt.\nIm Teamspiel gewinnt das gesamte Team des Finders.\nDas Spielfeld ist doppelt so breit; die Kamera folgt deinem Schiff.\nDie Lobby legt fest, ob eigene oder alle Messungen sichtbar sind.\nNach der Runde kannst du die Karte mit ← / → ansehen."
 horizontal_alignment = 1
 vertical_alignment = 1
 

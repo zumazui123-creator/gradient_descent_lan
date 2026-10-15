@@ -10,7 +10,9 @@ var x: float
 var probes_left := GameConstants.PROBES_PER_PLAYER
 var axis := 0
 var last_probe_time := -10.0
+var probe_lock_remaining := 0.0
 var measurements := 0
+var team_id := 0
 
 
 func _init(player_id: int, player_name: String, player_color: String, start_x: float) -> void:
@@ -25,6 +27,7 @@ func reset_for_round(start_x: float) -> void:
 	probes_left = GameConstants.PROBES_PER_PLAYER
 	axis = 0
 	last_probe_time = -10.0
+	probe_lock_remaining = 0.0
 	measurements = 0
 
 
@@ -36,4 +39,5 @@ func public_data() -> Dictionary:
 		"x": snappedf(x, 0.1),
 		"probes_left": probes_left,
 		"measurements": measurements,
+		"team_id": team_id,
 	}

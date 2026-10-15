@@ -6,12 +6,12 @@ signal connection_succeeded(is_host: bool)
 signal connection_failed(message: String)
 signal server_disconnected
 signal state_received(snapshot: Dictionary)
-signal private_probe_received(result: Dictionary)
+signal measurement_received(result: Dictionary)
 signal round_started(round_number: int)
 signal round_finished(winner_id: Variant, terrain: Array, treasure_x: int)
 signal notice_received(message: String)
 
-const DEFAULT_PORT := 50415
+const DEFAULT_PORT := 3131
 const SERVER_PEER_ID := 1
 const SNAPSHOT_INTERVAL := 0.08
 const CHANNEL_COUNT := 3
@@ -166,6 +166,33 @@ func request_restart_round() -> void:
 		_rpc_request_restart_round.rpc_id(SERVER_PEER_ID)
 
 
+func request_set_measurement_visibility(show_all: bool) -> void:
+	if peer == null:
+		return
+	if is_host:
+		_server_set_measurement_visibility(SERVER_PEER_ID, show_all)
+	else:
+		_rpc_set_measurement_visibility.rpc_id(SERVER_PEER_ID, show_all)
+
+
+func request_set_team_mode(enabled: bool) -> void:
+	if peer == null:
+		return
+	if is_host:
+		_server_set_team_mode(SERVER_PEER_ID, enabled)
+	else:
+		_rpc_set_team_mode.rpc_id(SERVER_PEER_ID, enabled)
+
+
+func request_set_player_team(player_id: int, team_id: int) -> void:
+	if peer == null:
+		return
+	if is_host:
+		_server_set_player_team(SERVER_PEER_ID, player_id, team_id)
+	else:
+		_rpc_set_player_team.rpc_id(SERVER_PEER_ID, player_id, team_id)
+
+
 func _on_connected_to_server() -> void:
 	if peer == null or is_host:
 		return
@@ -263,6 +290,24 @@ func _rpc_request_restart_round() -> void:
 		_server_start_round(multiplayer.get_remote_sender_id(), true)
 
 
+@rpc("any_peer", "call_remote", "reliable", 0)
+func _rpc_set_measurement_visibility(show_all: bool) -> void:
+	if multiplayer.is_server():
+		_server_set_measurement_visibility(multiplayer.get_remote_sender_id(), show_all)
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func _rpc_set_team_mode(enabled: bool) -> void:
+	if multiplayer.is_server():
+		_server_set_team_mode(multiplayer.get_remote_sender_id(), enabled)
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func _rpc_set_player_team(player_id: int, team_id: int) -> void:
+	if multiplayer.is_server():
+		_server_set_player_team(multiplayer.get_remote_sender_id(), player_id, team_id)
+
+
 @rpc("authority", "call_remote", "unreliable_ordered", 2)
 func _rpc_receive_state(snapshot: Dictionary) -> void:
 	_accept_state(snapshot)
@@ -270,7 +315,7 @@ func _rpc_receive_state(snapshot: Dictionary) -> void:
 
 @rpc("authority", "call_remote", "reliable", 0)
 func _rpc_receive_probe_result(result: Dictionary) -> void:
-	_accept_private_probe(result)
+	_accept_measurement(result)
 
 
 @rpc("authority", "call_remote", "reliable", 0)
@@ -302,13 +347,46 @@ func _server_probe(player_id: int) -> void:
 	if result.is_empty():
 		return
 
-	if player_id == SERVER_PEER_ID:
-		_accept_private_probe(result)
+	if GameManager.show_all_measurements:
+		_rpc_receive_probe_result.rpc(result)
+		_accept_measurement(result)
+	elif player_id == SERVER_PEER_ID:
+		_accept_measurement(result)
 	else:
 		_rpc_receive_probe_result.rpc_id(player_id, result)
 
 	_broadcast_state()
 	_announce_round_result_if_needed()
+
+
+func _server_set_measurement_visibility(requester_id: int, show_all: bool) -> void:
+	if requester_id != SERVER_PEER_ID:
+		_send_notice(requester_id, "Nur der Host darf die Messsichtbarkeit ändern.")
+		return
+	if not GameManager.set_show_all_measurements(show_all):
+		_send_notice(requester_id, "Die Messsichtbarkeit kann nur in der Lobby geändert werden.")
+		return
+	_broadcast_state()
+
+
+func _server_set_team_mode(requester_id: int, enabled: bool) -> void:
+	if requester_id != SERVER_PEER_ID:
+		_send_notice(requester_id, "Nur der Host darf den Teammodus ändern.")
+		return
+	if not GameManager.set_team_mode(enabled):
+		_send_notice(requester_id, "Der Teammodus kann nur in der Lobby geändert werden.")
+		return
+	_broadcast_state()
+
+
+func _server_set_player_team(requester_id: int, player_id: int, team_id: int) -> void:
+	if requester_id != SERVER_PEER_ID:
+		_send_notice(requester_id, "Nur der Host darf Teams zuweisen.")
+		return
+	if not GameManager.set_player_team(player_id, team_id):
+		_send_notice(requester_id, "Diese Teamzuweisung ist nicht erlaubt.")
+		return
+	_broadcast_state()
 
 
 func _server_start_round(requester_id: int, restart: bool) -> void:
@@ -322,7 +400,10 @@ func _server_start_round(requester_id: int, restart: bool) -> void:
 		_send_notice(requester_id, "Die Runde kann aus diesem Zustand nicht gestartet werden.")
 		return
 	if not GameManager.start_round():
-		_send_notice(requester_id, "Mindestens zwei Spieler werden benötigt.")
+		_send_notice(
+			requester_id,
+			"Mindestens zwei Spieler und im Teammodus mindestens zwei Teams werden benötigt."
+		)
 		return
 
 	_announced_result_round = 0
@@ -386,11 +467,11 @@ func _accept_state(snapshot: Dictionary) -> void:
 	state_received.emit(snapshot)
 
 
-func _accept_private_probe(result: Dictionary) -> void:
+func _accept_measurement(result: Dictionary) -> void:
 	if result.has("terrain") or result.has("treasure_x") or result.has("seed"):
 		return
-	ClientSession.store_private_measurement(result)
-	private_probe_received.emit(result)
+	ClientSession.store_measurement(result)
+	measurement_received.emit(result)
 
 
 func _accept_round_started(new_round_number: int, initial_snapshot: Dictionary) -> void:

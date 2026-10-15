@@ -42,7 +42,7 @@ func _process(delta: float) -> void:
 		float(_probe_animation["target"]),
 		float(_probe_animation["y"]) + maxf(delta, 0.0) * 680.0
 	)
-	if float(_probe_animation["age"]) > 1.1:
+	if float(_probe_animation["age"]) > GameConstants.PROBE_COOLDOWN_SECONDS:
 		_probe_animation.clear()
 		set_process(false)
 	queue_redraw()
@@ -114,30 +114,42 @@ func _draw_released_terrain() -> void:
 
 func _draw_measurements() -> void:
 	for measurement: Dictionary in ClientSession.measurements:
+		var measurement_color := _measurement_color(int(measurement.get("player_id", 0)))
 		var patch := _to_points(measurement.get("patch", []))
 		if patch.size() >= 2:
-			draw_polyline(patch, GREEN, 3.0, true)
+			draw_polyline(patch, measurement_color, 3.0, true)
 		draw_circle(
 			Vector2(float(measurement.get("x", 0.0)), float(measurement.get("y", 0.0))),
 			4.0,
-			WHITE
+			measurement_color
 		)
+		_draw_tangent(measurement, measurement_color, 2.0)
 
 	if ClientSession.last_measurement.is_empty():
 		return
-	var measurement := ClientSession.last_measurement
+	_draw_tangent(ClientSession.last_measurement, GOLD, 3.0)
+	draw_circle(
+		Vector2(
+			float(ClientSession.last_measurement.get("x", 0.0)),
+			float(ClientSession.last_measurement.get("y", 0.0))
+		),
+		5.0,
+		GOLD
+	)
+
+
+func _draw_tangent(measurement: Dictionary, color: Color, width: float) -> void:
 	var center_x := float(measurement.get("x", 0.0))
 	var center_y := float(measurement.get("y", 0.0))
 	var slope := float(measurement.get("slope", 0.0))
-	var half_span := 24.0
+	var half_span := GameConstants.MEASUREMENT_TANGENT_LENGTH / 2.0
 	draw_line(
 		Vector2(center_x - half_span, center_y - half_span * slope),
 		Vector2(center_x + half_span, center_y + half_span * slope),
-		GOLD,
-		3.0,
+		color,
+		width,
 		true
 	)
-	draw_circle(Vector2(center_x, center_y), 5.0, GOLD)
 
 
 func _to_points(source: Variant) -> PackedVector2Array:
@@ -159,3 +171,10 @@ func _profile_depth(points: PackedVector2Array, world_x: float) -> float:
 		if absf(point.x - world_x) < absf(closest.x - world_x):
 			closest = point
 	return closest.y
+
+
+func _measurement_color(player_id: int) -> Color:
+	for player: Dictionary in ClientSession.public_state.get("players", []):
+		if int(player.get("id", 0)) == player_id:
+			return Color.from_string(str(player.get("color", "#74f49d")), GREEN)
+	return WHITE

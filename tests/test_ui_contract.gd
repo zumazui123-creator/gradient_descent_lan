@@ -29,6 +29,8 @@ static func run() -> Array[String]:
 		[
 			"Center/Panel/Margin/Content/StatusLabel",
 			"Center/Panel/Margin/Content/Body/PlayerSection/PlayerList",
+			"Center/Panel/Margin/Content/Body/Rules/AllMeasurementsToggle",
+			"Center/Panel/Margin/Content/Body/Rules/TeamModeToggle",
 			"Center/Panel/Margin/Content/Actions/StartButton",
 		],
 		failures

@@ -56,9 +56,10 @@ static func run() -> Array[String]:
 	_expect(absf(slope) < 100.0, "Gefälle ist nicht plausibel", failures)
 
 	var patch := seabed.patch_at(sample.x)
+	var half_curve := int(Constants.MEASUREMENT_CURVE_LENGTH / 2.0)
 	_expect(not patch.is_empty(), "Mess-Patch ist leer", failures)
-	_expect(roundi(patch.front().x) == int(sample.x) - 55, "Mess-Patch startet falsch", failures)
-	_expect(roundi(patch.back().x) == int(sample.x) + 55, "Mess-Patch endet falsch", failures)
+	_expect(roundi(patch.front().x) == int(sample.x) - half_curve, "Mess-Patch startet falsch", failures)
+	_expect(roundi(patch.back().x) == int(sample.x) + half_curve, "Mess-Patch endet falsch", failures)
 
 	var profile := seabed.public_profile()
 	_expect(profile.size() == seabed.points.size(), "Öffentliches Profil ist unvollständig", failures)
